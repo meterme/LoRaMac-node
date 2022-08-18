@@ -44,7 +44,6 @@ extern "C"
 
 #include "region/Region.h"
 
-
 /*!
  * Channel plan group AS923-1
  * AS923_FREQ_OFFSET = 0
@@ -64,16 +63,10 @@ extern "C"
 #define CHANNEL_PLAN_GROUP_AS923_3                  3
 
 /*!
- * Channel plan group AS923-4
- * AS923_FREQ_OFFSET = -5.90MHz
- */
-#define CHANNEL_PLAN_GROUP_AS923_4                  4
-
-/*!
  * Channel plan group AS923-1 for Japan
  * AS923_FREQ_OFFSET = 0
  */
-#define CHANNEL_PLAN_GROUP_AS923_1_JP               5
+#define CHANNEL_PLAN_GROUP_AS923_1_JP               4
 
 /*!
  * LoRaMac maximum number of channels
@@ -206,7 +199,7 @@ extern "C"
 /*!
  * Size of RFU 1 field
  */
-#define AS923_RFU1_SIZE                             1
+#define AS923_RFU1_SIZE                             2
 
 /*!
  * Size of RFU 2 field
@@ -280,43 +273,24 @@ static const uint32_t BandwidthsAS923[] = { 125000, 125000, 125000, 125000, 1250
  * Maximum payload with respect to the datarate index.
  * The table is valid for the dwell time configuration of 0 for uplinks and downlinks.
  */
-static const uint8_t MaxPayloadOfDatarateDwell0AS923[] = { 51, 51, 115, 115, 242, 242, 242, 242 };
+static const uint8_t MaxPayloadOfDatarateDwell0AS923[] = { 59, 59, 123, 123, 250, 250, 250, 250 };
 
 /*!
  * Maximum payload with respect to the datarate index.
  * The table is only valid for uplinks.
  */
-static const uint8_t MaxPayloadOfDatarateDwell1AS923[] = { 0, 0, 11, 53, 125, 242, 242, 242 };
+static const uint8_t MaxPayloadOfDatarateDwell1AS923[] = { 0, 0, 19, 61, 133, 250, 250, 250 };
 
 /*!
- * Effective datarate offsets for receive window 1 when downlink dwell time is zero.
+ * Maximum payload with respect to the datarate index.
+ * The table is only valid for downlinks.
  */
-static const int8_t EffectiveRx1DrOffsetDownlinkDwell0AS923[8][8] =
-    {
-        { DR_0 , DR_0 , DR_0 , DR_0 , DR_0 , DR_0 , DR_1 , DR_2  }, // DR_0
-        { DR_1 , DR_0 , DR_0 , DR_0 , DR_0 , DR_0 , DR_2 , DR_3  }, // DR_1
-        { DR_2 , DR_1 , DR_0 , DR_0 , DR_0 , DR_0 , DR_3 , DR_4  }, // DR_2
-        { DR_3 , DR_2 , DR_1 , DR_0 , DR_0 , DR_0 , DR_4 , DR_5  }, // DR_3
-        { DR_4 , DR_3 , DR_2 , DR_1 , DR_0 , DR_0 , DR_5 , DR_6  }, // DR_4
-        { DR_5 , DR_4 , DR_3 , DR_2 , DR_1 , DR_0 , DR_6 , DR_7  }, // DR_5
-        { DR_6 , DR_5 , DR_4 , DR_3 , DR_2 , DR_1 , DR_7 , DR_7  }, // DR_6
-        { DR_7 , DR_6 , DR_5 , DR_4 , DR_3 , DR_2 , DR_7 , DR_7  }, // DR_7
-    };
+static const uint8_t MaxPayloadOfDatarateDwell1DownAS923[] = { 0, 0, 11, 53, 126, 242, 242, 242 };
 
 /*!
- * Effective datarate offsets for receive window 1 when downlink dwell time is one.
+ * Effective datarate offsets for receive window 1.
  */
-static const int8_t EffectiveRx1DrOffsetDownlinkDwell1AS923[8][8] =
-    {
-        { DR_2 , DR_2 , DR_2 , DR_2 , DR_2 , DR_2 , DR_2 , DR_2  }, // DR_0
-        { DR_2 , DR_2 , DR_2 , DR_2 , DR_2 , DR_2 , DR_2 , DR_3  }, // DR_1
-        { DR_2 , DR_2 , DR_2 , DR_2 , DR_2 , DR_2 , DR_3 , DR_4  }, // DR_2
-        { DR_3 , DR_2 , DR_2 , DR_2 , DR_2 , DR_2 , DR_4 , DR_5  }, // DR_3
-        { DR_4 , DR_3 , DR_2 , DR_2 , DR_2 , DR_2 , DR_5 , DR_6  }, // DR_4
-        { DR_5 , DR_4 , DR_3 , DR_2 , DR_2 , DR_2 , DR_6 , DR_7  }, // DR_5
-        { DR_6 , DR_5 , DR_4 , DR_3 , DR_2 , DR_2 , DR_7 , DR_7  }, // DR_6
-        { DR_7 , DR_6 , DR_5 , DR_4 , DR_3 , DR_2 , DR_7 , DR_7  }, // DR_7
-    };
+static const int8_t EffectiveRx1DrOffsetAS923[] = { 0, 1, 2, 3, 4, 5, -1, -2 };
 
 /*!
  * \brief The function gets a value of a specific phy attribute.
@@ -495,6 +469,13 @@ LoRaMacStatus_t RegionAS923ChannelAdd( ChannelAddParams_t* channelAdd );
  * \retval Returns true, if the channel was removed successfully.
  */
 bool RegionAS923ChannelsRemove( ChannelRemoveParams_t* channelRemove  );
+
+/*!
+ * \brief Sets the radio into continuous wave mode.
+ *
+ * \param [IN] continuousWave Pointer to the function parameters.
+ */
+void RegionAS923SetContinuousWave( ContinuousWaveParams_t* continuousWave );
 
 /*!
  * \brief Computes new datarate according to the given offset

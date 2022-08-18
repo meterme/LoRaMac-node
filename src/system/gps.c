@@ -47,7 +47,7 @@ const int32_t MaxWestPosition = 8388608;        // -2^23
 
 NmeaGpsData_t NmeaGpsData;
 
-static bool HasFix = false;
+static double HasFix = false;
 static double Latitude = 0;
 static double Longitude = 0;
 
@@ -184,12 +184,12 @@ void GpsConvertPositionFromStringToNumerical( void )
 }
 
 
-LmnStatus_t GpsGetLatestGpsPositionDouble( double *lati, double *longi )
+uint8_t GpsGetLatestGpsPositionDouble( double *lati, double *longi )
 {
-    LmnStatus_t status = LMN_STATUS_ERROR;
+    uint8_t status = FAIL;
     if( HasFix == true )
     {
-        status = LMN_STATUS_OK;
+        status = SUCCESS;
     }
     else
     {
@@ -200,14 +200,14 @@ LmnStatus_t GpsGetLatestGpsPositionDouble( double *lati, double *longi )
     return status;
 }
 
-LmnStatus_t GpsGetLatestGpsPositionBinary( int32_t *latiBin, int32_t *longiBin )
+uint8_t GpsGetLatestGpsPositionBinary( int32_t *latiBin, int32_t *longiBin )
 {
-    LmnStatus_t status = LMN_STATUS_ERROR;
+    uint8_t status = FAIL;
 
     CRITICAL_SECTION_BEGIN( );
     if( HasFix == true )
     {
-        status = LMN_STATUS_OK;
+        status = SUCCESS;
     }
     else
     {
@@ -313,7 +313,7 @@ static bool GpsNmeaValidateChecksum( int8_t *serialBuff, int32_t buffSize )
     }
 }
 
-LmnStatus_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
+uint8_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
 {
     uint8_t i = 1;
     uint8_t j = 0;
@@ -322,12 +322,12 @@ LmnStatus_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
     if( rxBuffer[0] != '$' )
     {
         GpsMcuInvertPpsTrigger( );
-        return LMN_STATUS_ERROR;
+        return FAIL;
     }
 
     if( GpsNmeaValidateChecksum( rxBuffer, rxBufferSize ) == false )
     {
-        return LMN_STATUS_ERROR;
+        return FAIL;
     }
 
     fieldSize = 0;
@@ -335,7 +335,7 @@ LmnStatus_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
     {
         if( fieldSize > 6 )
         {
-            return LMN_STATUS_ERROR;
+            return FAIL;
         }
     }
     for( j = 0; j < fieldSize; j++, i++ )
@@ -351,7 +351,7 @@ LmnStatus_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         {
             if( fieldSize > 11 )
             {
-                return LMN_STATUS_ERROR;
+                return FAIL;
             }
         }
         for( j = 0; j < fieldSize; j++, i++ )
@@ -364,7 +364,7 @@ LmnStatus_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         {
             if( fieldSize > 10 )
             {
-                return LMN_STATUS_ERROR;
+                return FAIL;
             }
         }
         for( j = 0; j < fieldSize; j++, i++ )
@@ -377,7 +377,7 @@ LmnStatus_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         {
             if( fieldSize > 2 )
             {
-                return LMN_STATUS_ERROR;
+                return FAIL;
             }
         }
         for( j = 0; j < fieldSize; j++, i++ )
@@ -390,7 +390,7 @@ LmnStatus_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         {
             if( fieldSize > 11 )
             {
-                return LMN_STATUS_ERROR;
+                return FAIL;
             }
         }
         for( j = 0; j < fieldSize; j++, i++ )
@@ -403,7 +403,7 @@ LmnStatus_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         {
             if( fieldSize > 2 )
             {
-                return LMN_STATUS_ERROR;
+                return FAIL;
             }
         }
         for( j = 0; j < fieldSize; j++, i++ )
@@ -416,7 +416,7 @@ LmnStatus_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         {
             if( fieldSize > 2 )
             {
-                return LMN_STATUS_ERROR;
+                return FAIL;
             }
         }
         for( j = 0; j < fieldSize; j++, i++ )
@@ -429,7 +429,7 @@ LmnStatus_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         {
             if( fieldSize > 3 )
             {
-                return LMN_STATUS_ERROR;
+                return FAIL;
             }
         }
         for( j = 0; j < fieldSize; j++, i++ )
@@ -442,7 +442,7 @@ LmnStatus_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         {
             if( fieldSize > 6 )
             {
-                return LMN_STATUS_ERROR;
+                return FAIL;
             }
         }
         for( j = 0; j < fieldSize; j++, i++ )
@@ -455,7 +455,7 @@ LmnStatus_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         {
             if( fieldSize > 8 )
             {
-                return LMN_STATUS_ERROR;
+                return FAIL;
             }
         }
         for( j = 0; j < fieldSize; j++, i++ )
@@ -468,7 +468,7 @@ LmnStatus_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         {
             if( fieldSize > 2 )
             {
-                return LMN_STATUS_ERROR;
+                return FAIL;
             }
         }
         for( j = 0; j < fieldSize; j++, i++ )
@@ -481,7 +481,7 @@ LmnStatus_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         {
             if( fieldSize > 8 )
             {
-                return LMN_STATUS_ERROR;
+                return FAIL;
             }
         }
         for( j = 0; j < fieldSize; j++, i++ )
@@ -494,7 +494,7 @@ LmnStatus_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         {
             if( fieldSize > 2 )
             {
-                return LMN_STATUS_ERROR;
+                return FAIL;
             }
         }
         for( j = 0; j < fieldSize; j++, i++ )
@@ -503,7 +503,7 @@ LmnStatus_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         }
 
         GpsFormatGpsData( );
-        return LMN_STATUS_OK;
+        return SUCCESS;
     }
     else if ( strncmp( ( const char* )NmeaGpsData.NmeaDataType, ( const char* )NmeaDataTypeGPRMC, 5 ) == 0 )
     {
@@ -513,7 +513,7 @@ LmnStatus_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         {
             if( fieldSize > 11 )
             {
-                return LMN_STATUS_ERROR;
+                return FAIL;
             }
         }
         for( j = 0; j < fieldSize; j++, i++ )
@@ -526,7 +526,7 @@ LmnStatus_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         {
             if( fieldSize > 2 )
             {
-                return LMN_STATUS_ERROR;
+                return FAIL;
             }
         }
         for( j = 0; j < fieldSize; j++, i++ )
@@ -539,7 +539,7 @@ LmnStatus_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         {
             if( fieldSize > 10 )
             {
-                return LMN_STATUS_ERROR;
+                return FAIL;
             }
         }
         for( j = 0; j < fieldSize; j++, i++ )
@@ -552,7 +552,7 @@ LmnStatus_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         {
             if( fieldSize > 2 )
             {
-                return LMN_STATUS_ERROR;
+                return FAIL;
             }
         }
         for( j = 0; j < fieldSize; j++, i++ )
@@ -565,7 +565,7 @@ LmnStatus_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         {
             if( fieldSize > 11 )
             {
-                return LMN_STATUS_ERROR;
+                return FAIL;
             }
         }
         for( j = 0; j < fieldSize; j++, i++ )
@@ -578,7 +578,7 @@ LmnStatus_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         {
             if( fieldSize > 2 )
             {
-                return LMN_STATUS_ERROR;
+                return FAIL;
             }
         }
         for( j = 0; j < fieldSize; j++, i++ )
@@ -591,7 +591,7 @@ LmnStatus_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         {
             if( fieldSize > 8 )
             {
-                return LMN_STATUS_ERROR;
+                return FAIL;
             }
         }
         for( j = 0; j < fieldSize; j++, i++ )
@@ -604,7 +604,7 @@ LmnStatus_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         {
             if( fieldSize > 8 )
             {
-                return LMN_STATUS_ERROR;
+                return FAIL;
             }
         }
         for( j = 0; j < fieldSize; j++, i++ )
@@ -617,7 +617,7 @@ LmnStatus_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         {
             if( fieldSize > 8 )
             {
-                return LMN_STATUS_ERROR;
+                return FAIL;
             }
         }
         for( j = 0; j < fieldSize; j++, i++ )
@@ -626,11 +626,11 @@ LmnStatus_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         }
 
         GpsFormatGpsData( );
-        return LMN_STATUS_OK;
+        return SUCCESS;
     }
     else
     {
-        return LMN_STATUS_ERROR;
+        return FAIL;
     }
 }
 

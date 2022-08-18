@@ -84,16 +84,6 @@ extern "C"
 #include "LoRaMacClassBNvm.h"
 
 /*!
- * LoRaWAN version definition.
- */
-#define LORAMAC_VERSION                             0x01010100
-
-/*!
- * LoRaWAN fallback version definition.
- */
-#define LORAMAC_FALLBACK_VERSION                    0x01000400
-
-/*!
  * Maximum number of times the MAC layer tries to get an acknowledge.
  */
 #define MAX_ACK_RETRIES                             8
@@ -163,13 +153,6 @@ extern "C"
  * Bitmap value for the NVM group class b.
  */
 #define LORAMAC_NVM_NOTIFY_FLAG_CLASS_B             0x40
-
-/*!
- * LoRaWAN compliance certification protocol port number.
- *
- * LoRaWAN Specification V1.x.x, chapter 4.3.2
- */
-#define LORAMAC_CERT_FPORT 224
 
 /*!
  * End-Device activation type
@@ -281,7 +264,7 @@ typedef struct sLoRaMacParams
      */
     uint32_t JoinAcceptDelay2;
     /*!
-     * Number of uplink messages repetitions [1:15]
+     * Number of uplink messages repetitions [1:15] (unconfirmed messages only)
      */
     uint8_t ChannelsNbTrans;
     /*!
@@ -371,17 +354,6 @@ typedef struct sBeaconInfo
      */
     int8_t Snr;
     /*!
-     * Param
-     * |  Bits | 7:2 |  1:0 |
-     * |-------|-----|------|
-     * | Param | RFU | Prec |
-     *
-     * Prec field is used to interpret the precision of beacon's transmit time
-     * as 10^(-6+prec) and the default value is 0.
-     * RFU will be set to Zero and Prec can take values between 0:3.
-     */
-    uint8_t Param;
-    /*!
      * Data structure for the gateway specific part. The
      * content of the values may differ for each gateway
      */
@@ -447,6 +419,10 @@ typedef enum eLoRaMacEventInfoStatus
      */
     LORAMAC_EVENT_INFO_STATUS_TX_DR_PAYLOAD_SIZE_ERROR,
     /*!
+     * The node has lost MAX_FCNT_GAP or more frames.
+     */
+    LORAMAC_EVENT_INFO_STATUS_DOWNLINK_TOO_MANY_FRAMES_LOSS,
+    /*!
      * An address error occurred
      */
     LORAMAC_EVENT_INFO_STATUS_ADDRESS_FAIL,
@@ -503,13 +479,13 @@ typedef union eLoRaMacFlags_t
          */
         uint8_t MlmeInd                 : 1;
         /*!
+         * MLME-Ind to schedule an uplink pending
+         */
+        uint8_t MlmeSchedUplinkInd      : 1;
+        /*!
          * MAC cycle done
          */
         uint8_t MacDone                 : 1;
-        /*!
-         * Indicate if a NVM handling is required
-         */
-        uint8_t NvmHandle               : 1;
     }Bits;
 }LoRaMacFlags_t;
 
@@ -592,22 +568,6 @@ typedef struct sLoRaMacNvmDataGroup1
      */
     bool SrvAckRequested;
     /*!
-     * Counts the number if uplinks to know when the next Rejoin request type 0 is required.
-     * ( If requested by the server through RejoinParamSetupReq MAC command )
-     */
-    uint32_t Rejoin0UplinksCounter;
-    /*!
-     * Counter of Rejoin Request of retries.
-     * ( If requested by the server through ForceRejoinReq MAC command )
-     */
-    uint8_t ForceRejoinRetriesCounter;
-    /*!
-     * Counts the number of uplinks containing a RekeyInd MAC command to know
-     * when the end device should reverted to join state because it didn't
-     * received a RekeyConf.
-     */
-    uint16_t RekeyIndUplinksCounter;
-    /*!
      * CRC32 value of the MacGroup1 data structure.
      */
     uint32_t Crc32;
@@ -615,15 +575,15 @@ typedef struct sLoRaMacNvmDataGroup1
 
 typedef struct sLoRaMacNvmDataGroup2
 {
-    /*
+    /*!
      * LoRaMac region.
      */
     LoRaMacRegion_t Region;
-    /*
+    /*!
      * LoRaMac parameters
      */
     LoRaMacParams_t MacParams;
-    /*
+    /*!
      * LoRaMac default parameters
      */
     LoRaMacParams_t MacParamsDefaults;
@@ -635,11 +595,11 @@ typedef struct sLoRaMacNvmDataGroup2
      * Channels data rate
      */
     int8_t ChannelsDatarateDefault;
-    /*
+    /*!
      * Network ID ( 3 bytes )
      */
     uint32_t NetID;
-    /*
+    /*!
      * Mote Address
      */
     uint32_t DevAddr;
@@ -647,11 +607,11 @@ typedef struct sLoRaMacNvmDataGroup2
     * Multicast channel list
     */
     MulticastCtx_t MulticastChannelList[LORAMAC_MAX_MC_CTX];
-    /*
+    /*!
      * Actual device class
      */
     DeviceClass_t DeviceClass;
-    /*
+    /*!
      * Indicates if the node is connected to
      * a private or public network
      */
@@ -660,79 +620,33 @@ typedef struct sLoRaMacNvmDataGroup2
      * LoRaMac ADR control status
      */
     bool AdrCtrlOn;
-    /*
+    /*!
      * Maximum duty cycle
      * \remark Possibility to shutdown the device.
      */
     uint8_t MaxDCycle;
-    /*
-    * Enables/Disables duty cycle management (Test only)
-    */
+    /*!
+     * Enables/Disables duty cycle management (Test only)
+     */
     bool DutyCycleOn;
-    /*
-     * Set to true, if the datarate was increased
-     * with a link adr request.
-     */
-    bool ChannelsDatarateChangedLinkAdrReq;
-    /*
-     * The stack will set this variable to true, if a downlink has been received.
-     */
-    bool DownlinkReceived;
-    /*
-     * Enables/disable FPort 224 processing (certification port)
-     */
-    bool IsCertPortOn;
-    /*
+    /*!
      * Aggregated duty cycle management
      */
     uint16_t AggregatedDCycle;
-    /*
-    * Stores the time at LoRaMac initialization.
-    *
-    * \remark Used for the BACKOFF_DC computation.
-    */
+    /*!
+     * Stores the time at LoRaMac initialization.
+     *
+     * \remark Used for the BACKOFF_DC computation.
+     */
     SysTime_t InitializationTime;
-    /*
+    /*!
      * Current LoRaWAN Version
      */
     Version_t Version;
-    /*
+    /*!
      * End-Device network activation
      */
     ActivationType_t NetworkActivation;
-    /*!
-     * Number of uplinks without Rejoin request type 0.
-     * ( If requested by the server through RejoinParamSetupReq MAC command )
-     * When it's set to 0, Rejoin0UplinksCounter won't be incremented
-     */
-    uint32_t Rejoin0UplinksLimit;
-    /*!
-     * The total number of times the device will retry the Rejoin Request.
-     * ( If requested by the server through ForceRejoinReq MAC command )
-     */
-    uint8_t ForceRejoinMaxRetries;
-    /*!
-     * Rejoin Request Type
-     * ( If requested by the server through ForceRejoinReq MAC command )
-     */
-    uint8_t ForceRejoinType;
-    /*!
-     * Time in seconds between cyclic transmission of Type 0 Rejoin requests.
-     */
-    uint32_t Rejoin0CycleInSec;
-    /*!
-     * Time in seconds between cyclic transmission of Type 1 Rejoin requests.
-     */
-    uint32_t Rejoin1CycleInSec;
-    /*!
-     * Time in seconds between cyclic transmission of Type 2 Rejoin requests.
-     */
-    uint32_t Rejoin2CycleInSec;
-    /*!
-     * Indicates if a Rejoin request was sent and no join-accept or any downlink
-     * has been received yet.
-     */
-    bool IsRejoinAcceptPending;
     /*!
      * CRC32 value of the MacGroup2 data structure.
      */
@@ -886,6 +800,27 @@ typedef struct sMcpsReqConfirmed
      * Uplink datarate, if ADR is off
      */
     int8_t Datarate;
+    /*!
+     * Number of trials to transmit the frame, if the LoRaMAC layer did not
+     * receive an acknowledgment. The MAC performs a datarate adaptation,
+     * according to the LoRaWAN Specification V1.0.2, chapter 18.4, according
+     * to the following table:
+     *
+     * Transmission nb | Data Rate
+     * ----------------|-----------
+     * 1 (first)       | DR
+     * 2               | DR
+     * 3               | max(DR-1,0)
+     * 4               | max(DR-1,0)
+     * 5               | max(DR-2,0)
+     * 6               | max(DR-2,0)
+     * 7               | max(DR-3,0)
+     * 8               | max(DR-3,0)
+     *
+     * Note, that if NbTrials is set to 1 or 2, the MAC will not decrease
+     * the datarate, in case the LoRaMAC layer did not receive an acknowledgment
+     */
+    uint8_t NbTrials;
 }McpsReqConfirmed_t;
 
 /*!
@@ -970,7 +905,7 @@ typedef struct sMcpsConfirm
     /*!
      * Provides the number of retransmissions
      */
-    uint8_t NbTrans;
+    uint8_t NbRetries;
     /*!
      * The transmission time on air of the frame
      */
@@ -1013,7 +948,7 @@ typedef struct sMcpsIndication
     /*!
      * Frame pending status
      */
-    uint8_t IsUplinkTxPending;
+    uint8_t FramePending;
     /*!
      * Pointer to the received data stream
      */
@@ -1054,12 +989,6 @@ typedef struct sMcpsIndication
      * Set if a DeviceTimeAns MAC command was received.
      */
     bool DeviceTimeAnsReceived;
-    /*!
-     * Response timeout for a class b or c device when a
-     * confirmed downlink has been received. In all other
-     * cases this variable is 0.
-     */
-    TimerTime_t ResponseTimeout;
 }McpsIndication_t;
 
 /*!
@@ -1071,13 +1000,11 @@ typedef struct sMcpsIndication
  * Name                         | Request | Indication | Response | Confirm
  * ---------------------------- | :-----: | :--------: | :------: | :-----:
  * \ref MLME_JOIN               | YES     | NO         | NO       | YES
- * \ref MLME_REJOIN_0           | YES     | NO         | NO       | YES
- * \ref MLME_REJOIN_1           | YES     | NO         | NO       | YES
  * \ref MLME_LINK_CHECK         | YES     | NO         | NO       | YES
  * \ref MLME_TXCW               | YES     | NO         | NO       | YES
+ * \ref MLME_SCHEDULE_UPLINK    | NO      | YES        | NO       | NO
  * \ref MLME_DERIVE_MC_KE_KEY   | YES     | NO         | NO       | YES
  * \ref MLME_DERIVE_MC_KEY_PAIR | YES     | NO         | NO       | YES
- * \ref MLME_REVERT_JOIN        | NO      | YES        | NO       | NO
  *
  * The following table provides links to the function implementations of the
  * related MLME primitives.
@@ -1124,6 +1051,17 @@ typedef enum eMlme
      * LoRaWAN end-device certification
      */
     MLME_TXCW,
+    /*!
+     * Sets Tx continuous wave mode (new LoRa-Alliance CC definition)
+     *
+     * LoRaWAN end-device certification
+     */
+    MLME_TXCW_1,
+    /*!
+     * Indicates that the application shall perform an uplink as
+     * soon as possible.
+     */
+    MLME_SCHEDULE_UPLINK,
     /*!
      * Derives the McKEKey from the AppKey or NwkKey.
      */
@@ -1172,13 +1110,6 @@ typedef enum eMlme
      * LoRaWAN end-device certification
      */
     MLME_BEACON_LOST,
-    /*!
-     *
-     * Indicates that the device hasn't received a RekeyConf and it reverts to the join state.
-     *
-     * \remark The upper layer is required to trigger the Join process again.
-     */
-    MLME_REVERT_JOIN,
 }Mlme_t;
 
 /*!
@@ -1186,12 +1117,6 @@ typedef enum eMlme
  */
 typedef struct sMlmeReqJoin
 {
-    /*!
-     * LoRaWAN Network End-Device Activation ( ACTIVATION_TYPE_NONE, ACTIVATION_TYPE_ABP or OTTA )
-     *
-     * Related MIB type: \ref MIB_NETWORK_ACTIVATION
-     */
-    ActivationType_t NetworkActivation;
     /*!
      * Datarate used for join request.
      */
@@ -1410,7 +1335,6 @@ typedef struct sMlmeIndication
  * \ref MIB_JOIN_ACCEPT_DELAY_1                  | YES | YES
  * \ref MIB_JOIN_ACCEPT_DELAY_2                  | YES | YES
  * \ref MIB_CHANNELS_DATARATE                    | YES | YES
- * \ref MIB_CHANNELS_MIN_TX_DATARATE             | YES | NO
  * \ref MIB_CHANNELS_DEFAULT_DATARATE            | YES | YES
  * \ref MIB_CHANNELS_TX_POWER                    | YES | YES
  * \ref MIB_CHANNELS_DEFAULT_TX_POWER            | YES | YES
@@ -1433,10 +1357,6 @@ typedef struct sMlmeIndication
  * \ref MIB_NVM_CTXS                             | YES | YES
  * \ref MIB_ABP_LORAWAN_VERSION                  | NO  | YES
  * \ref MIB_LORAWAN_VERSION                      | YES | NO
- * \ref MIB_IS_CERT_FPORT_ON                     | YES | YES
- * \ref MIB_REJOIN_0_CYCLE                       | YES | YES
- * \ref MIB_REJOIN_1_CYCLE                       | YES | YES
- * \ref MIB_REJOIN_2_CYCLE                       | YES | NO
  *
  * The following table provides links to the function implementations of the
  * related MIB primitives:
@@ -1677,7 +1597,7 @@ typedef enum eMib
     /*!
      * Set the number of repetitions on a channel
      *
-     * LoRaWAN Specification V1.0.2, chapter 5.2, V1.1.0, chapter 5.3
+     * LoRaWAN Specification V1.0.2, chapter 5.2
      */
     MIB_CHANNELS_NB_TRANS,
     /*!
@@ -1710,14 +1630,6 @@ typedef enum eMib
      * LoRaWAN Regional Parameters V1.0.2rB
      */
     MIB_JOIN_ACCEPT_DELAY_2,
-    /*!
-     * Minimum Data rate of a channel
-     *
-     * LoRaWAN Regional Parameters V1.0.2rB
-     *
-     * The possible values are region specific. Please refer to \ref DR_0 to \ref DR_15 for details.
-     */
-    MIB_CHANNELS_MIN_TX_DATARATE,
     /*!
      * Default Data rate of a channel
      *
@@ -1796,18 +1708,6 @@ typedef enum eMib
      */
     MIB_LORAWAN_VERSION,
     /*!
-     * Time between periodic transmission of a Type 0 Rejoin request.
-     */
-    MIB_REJOIN_0_CYCLE,
-    /*!
-     * Time between periodic transmission of a Type 1 Rejoin request.
-     */
-    MIB_REJOIN_1_CYCLE,
-    /*!
-     * Time between periodic transmission of a Type 2 Rejoin request.
-     */
-    MIB_REJOIN_2_CYCLE,
-    /*!
      * Beacon interval in ms
      */
     MIB_BEACON_INTERVAL,
@@ -1865,10 +1765,6 @@ typedef enum eMib
      * The allowed ranges are region specific. Please refer to \ref DR_0 to \ref DR_15 for details.
      */
      MIB_PING_SLOT_DATARATE,
-     /*!
-      * LoRaWAN certification FPort handling state (ON/OFF)
-      */
-     MIB_IS_CERT_FPORT_ON,
 }Mib_t;
 
 /*!
@@ -2135,12 +2031,6 @@ typedef union uMibParam
      */
     uint32_t JoinAcceptDelay2;
     /*!
-     * Channels minimum tx data rate
-     *
-     * Related MIB type: \ref MIB_CHANNELS_MIN_TX_DATARATE
-     */
-    int8_t ChannelsMinTxDatarate;
-    /*!
      * Channels data rate
      *
      * Related MIB type: \ref MIB_CHANNELS_DEFAULT_DATARATE
@@ -2217,18 +2107,6 @@ typedef union uMibParam
         Version_t LoRaWan;
         Version_t LoRaWanRegion;
     }LrWanVersion;
-    /*!
-     * Time in seconds between cyclic transmission of Type 0 Rejoin requests.
-     */
-    uint32_t Rejoin0CycleInSec;
-    /*!
-     * Time in seconds between cyclic transmission of Type 1 Rejoin requests.
-     */
-    uint32_t Rejoin1CycleInSec;
-    /*!
-     * Time in seconds between cyclic transmission of Type 2 Rejoin requests.
-     */
-    uint32_t Rejoin2CycleInSec;
     /*!
      * Beacon interval in ms
      *
@@ -2309,12 +2187,6 @@ typedef union uMibParam
      * Related MIB type: \ref MIB_PING_SLOT_DATARATE
      */
     int8_t PingSlotDatarate;
-    /*!
-     * LoRaWAN certification FPort handling state (ON/OFF)
-     *
-     * Related MIB type: \ref MIB_IS_CERT_FPORT_ON
-     */
-    bool IsCertPortOn;
 }MibParam_t;
 
 /*!

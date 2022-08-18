@@ -169,7 +169,7 @@ extern "C"
 /*!
  * Size of RFU 1 field
  */
-#define IN865_RFU1_SIZE                             0
+#define IN865_RFU1_SIZE                             1
 
 /*!
  * Size of RFU 2 field
@@ -226,11 +226,6 @@ extern "C"
 #define IN865_JOIN_CHANNELS                         ( uint16_t )( LC( 1 ) | LC( 2 ) | LC( 3 ) )
 
 /*!
- * RFU value
- */
-#define IN865_DR_RFU_VALUE                          { 0, 0, 0, 0, 0, 0, 0, 0 }
-
-/*!
  * Data rates table definition
  */
 static const uint8_t DataratesIN865[]  = { 12, 11, 10,  9,  8,  7,  7, 50 };
@@ -248,17 +243,7 @@ static const uint8_t MaxPayloadOfDatarateIN865[] = { 51, 51, 51, 115, 242, 242, 
 /*!
  * Effective datarate offsets for receive window 1.
  */
-static const int8_t EffectiveRx1DrOffsetIN865[8][8] =
-{
-    { DR_0 , DR_0 , DR_0 , DR_0 , DR_0 , DR_0 , DR_1 , DR_2  }, // DR_0
-    { DR_1 , DR_0 , DR_0 , DR_0 , DR_0 , DR_0 , DR_2 , DR_3  }, // DR_1
-    { DR_2 , DR_1 , DR_0 , DR_0 , DR_0 , DR_0 , DR_3 , DR_4  }, // DR_2
-    { DR_3 , DR_2 , DR_1 , DR_0 , DR_0 , DR_0 , DR_4 , DR_5  }, // DR_3
-    { DR_4 , DR_3 , DR_2 , DR_1 , DR_0 , DR_0 , DR_5 , DR_5  }, // DR_4
-    { DR_5 , DR_4 , DR_3 , DR_2 , DR_1 , DR_0 , DR_5 , DR_7  }, // DR_5
-                     IN865_DR_RFU_VALUE                       , // DR_6
-    { DR_7 , DR_5 , DR_5 , DR_4 , DR_3 , DR_2 , DR_7 , DR_7  }, // DR_7
-};
+static const int8_t EffectiveRx1DrOffsetIN865[] = { 0, 1, 2, 3, 4, 5, -1, -2 };
 
 /*!
  * \brief The function gets a value of a specific phy attribute.
@@ -437,6 +422,13 @@ LoRaMacStatus_t RegionIN865ChannelAdd( ChannelAddParams_t* channelAdd );
  * \retval Returns true, if the channel was removed successfully.
  */
 bool RegionIN865ChannelsRemove( ChannelRemoveParams_t* channelRemove  );
+
+/*!
+ * \brief Sets the radio into continuous wave mode.
+ *
+ * \param [IN] continuousWave Pointer to the function parameters.
+ */
+void RegionIN865SetContinuousWave( ContinuousWaveParams_t* continuousWave );
 
 /*!
  * \brief Computes new datarate according to the given offset

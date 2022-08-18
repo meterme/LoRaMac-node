@@ -174,7 +174,7 @@ extern "C"
 /*!
  * Size of RFU 1 field
  */
-#define KR920_RFU1_SIZE                             1
+#define KR920_RFU1_SIZE                             2
 
 /*!
  * Size of RFU 2 field
@@ -432,6 +432,13 @@ LoRaMacStatus_t RegionKR920ChannelAdd( ChannelAddParams_t* channelAdd );
  * \retval Returns true, if the channel was removed successfully.
  */
 bool RegionKR920ChannelsRemove( ChannelRemoveParams_t* channelRemove  );
+
+/*!
+ * \brief Sets the radio into continuous wave mode.
+ *
+ * \param [IN] continuousWave Pointer to the function parameters.
+ */
+void RegionKR920SetContinuousWave( ContinuousWaveParams_t* continuousWave );
 
 /*!
  * \brief Computes new datarate according to the given offset

@@ -31,7 +31,7 @@ static uint8_t I2cDeviceAddr = 0;
 
 static bool SX9500Initialized = false;
 
-LmnStatus_t SX9500Init( void )
+uint8_t SX9500Init( void )
 {
     uint8_t regVal = 0;
 
@@ -44,39 +44,39 @@ LmnStatus_t SX9500Init( void )
         SX9500Read( SX9500_REG_PROXCTRL0, &regVal );
         if( regVal != 0x0F )
         {
-            return LMN_STATUS_ERROR;
+            return FAIL;
         }
 
         SX9500Reset( );
     }
-    return LMN_STATUS_OK;
+    return SUCCESS;
 }
 
-LmnStatus_t SX9500Reset( )
+uint8_t SX9500Reset( )
 {
-    if( SX9500Write( SX9500_REG_RESET, SX9500_RESET_CMD ) == LMN_STATUS_OK )
+    if( SX9500Write( SX9500_REG_RESET, SX9500_RESET_CMD ) == SUCCESS )
     {
-        return LMN_STATUS_OK;
+        return SUCCESS;
     }
-    return LMN_STATUS_ERROR;
+    return FAIL;
 }
 
-LmnStatus_t SX9500Write( uint8_t addr, uint8_t data )
+uint8_t SX9500Write( uint8_t addr, uint8_t data )
 {
     return SX9500WriteBuffer( addr, &data, 1 );
 }
 
-LmnStatus_t SX9500WriteBuffer( uint8_t addr, uint8_t *data, uint8_t size )
+uint8_t SX9500WriteBuffer( uint8_t addr, uint8_t *data, uint8_t size )
 {
     return I2cWriteMemBuffer( &I2c, I2cDeviceAddr << 1, addr, data, size );
 }
 
-LmnStatus_t SX9500Read( uint8_t addr, uint8_t *data )
+uint8_t SX9500Read( uint8_t addr, uint8_t *data )
 {
     return SX9500ReadBuffer( addr, data, 1 );
 }
 
-LmnStatus_t SX9500ReadBuffer( uint8_t addr, uint8_t *data, uint8_t size )
+uint8_t SX9500ReadBuffer( uint8_t addr, uint8_t *data, uint8_t size )
 {
     return I2cReadMemBuffer( &I2c, I2cDeviceAddr << 1, addr, data, size );
 }

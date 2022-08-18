@@ -160,7 +160,7 @@ extern "C"
 /*!
  * Size of RFU 1 field
  */
-#define US915_RFU1_SIZE                             4
+#define US915_RFU1_SIZE                             5
 
 /*!
  * Size of RFU 2 field
@@ -414,6 +414,13 @@ LoRaMacStatus_t RegionUS915ChannelAdd( ChannelAddParams_t* channelAdd );
  * \retval Returns true, if the channel was removed successfully.
  */
 bool RegionUS915ChannelsRemove( ChannelRemoveParams_t* channelRemove  );
+
+/*!
+ * \brief Sets the radio into continuous wave mode.
+ *
+ * \param [IN] continuousWave Pointer to the function parameters.
+ */
+void RegionUS915SetContinuousWave( ContinuousWaveParams_t* continuousWave );
 
 /*!
  * \brief Computes new datarate according to the given offset

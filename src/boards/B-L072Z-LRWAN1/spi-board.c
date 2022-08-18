@@ -145,7 +145,7 @@ uint16_t SpiInOut( Spi_t *obj, uint16_t outData )
 
     if( ( obj == NULL ) || ( SpiHandle[obj->SpiId].Instance ) == NULL )
     {
-        assert_param( LMN_STATUS_ERROR );
+        assert_param( FAIL );
     }
 
     __HAL_SPI_ENABLE( &SpiHandle[obj->SpiId] );

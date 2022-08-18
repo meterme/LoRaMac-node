@@ -29,7 +29,6 @@ extern "C"
 #endif
 
 #include <stdint.h>
-#include "utilities.h"
 
 #define SX1509_I2C_ADDRESS                          0x3E
 
@@ -162,18 +161,18 @@ void SX1509Init( void );
 /*!
  * \brief Resets the device
  *
- * \retval status [LMN_STATUS_OK, LMN_STATUS_ERROR]
+ * \retval status [SUCCESS, FAIL]
  */
-LmnStatus_t SX1509Reset( void );
+uint8_t SX1509Reset( void );
 
 /*!
  * \brief Writes a byte at specified address in the device
  *
  * \param [IN]: addr
  * \param [IN]: data
- * \retval status [LMN_STATUS_OK, LMN_STATUS_ERROR]
+ * \retval status [SUCCESS, FAIL]
  */
-LmnStatus_t SX1509Write( uint8_t addr, uint8_t data );
+uint8_t SX1509Write( uint8_t addr, uint8_t data );
 
 /*!
  * \brief Writes a buffer at specified address in the device
@@ -181,18 +180,18 @@ LmnStatus_t SX1509Write( uint8_t addr, uint8_t data );
  * \param [IN]: addr
  * \param [IN]: data
  * \param [IN]: size
- * \retval status [LMN_STATUS_OK, LMN_STATUS_ERROR]
+ * \retval status [SUCCESS, FAIL]
  */
-LmnStatus_t SX1509WriteBuffer( uint8_t addr, uint8_t *data, uint8_t size );
+uint8_t SX1509WriteBuffer( uint8_t addr, uint8_t *data, uint8_t size );
 
 /*!
  * \brief Reads a byte at specified address in the device
  *
  * \param [IN]: addr
  * \param [OUT]: data
- * \retval status [LMN_STATUS_OK, LMN_STATUS_ERROR]
+ * \retval status [SUCCESS, FAIL]
  */
-LmnStatus_t SX1509Read( uint8_t addr, uint8_t *data );
+uint8_t SX1509Read( uint8_t addr, uint8_t *data );
 
 /*!
  * \brief Reads a buffer at specified address in the device
@@ -200,9 +199,9 @@ LmnStatus_t SX1509Read( uint8_t addr, uint8_t *data );
  * \param [IN]: addr
  * \param [OUT]: data
  * \param [IN]: size
- * \retval status [LMN_STATUS_OK, LMN_STATUS_ERROR]
+ * \retval status [SUCCESS, FAIL]
  */
-LmnStatus_t SX1509ReadBuffer( uint8_t addr, uint8_t *data, uint8_t size );
+uint8_t SX1509ReadBuffer( uint8_t addr, uint8_t *data, uint8_t size );
 
 /*!
  * \brief Sets the I2C device slave address

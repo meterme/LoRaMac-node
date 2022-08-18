@@ -42,34 +42,34 @@ void SX1509Init( void )
     }
 }
 
-LmnStatus_t SX1509Reset( )
+uint8_t SX1509Reset( )
 {
-    if( SX1509Write( RegReset, 0x12 ) == LMN_STATUS_OK )
+    if( SX1509Write( RegReset, 0x12 ) == SUCCESS )
     {
-        if( SX1509Write( RegReset, 0x34 ) == LMN_STATUS_OK )
+        if( SX1509Write( RegReset, 0x34 ) == SUCCESS )
         {
-            return LMN_STATUS_OK;
+            return SUCCESS;
         }
     }
-    return LMN_STATUS_ERROR;
+    return FAIL;
 }
 
-LmnStatus_t SX1509Write( uint8_t addr, uint8_t data )
+uint8_t SX1509Write( uint8_t addr, uint8_t data )
 {
     return SX1509WriteBuffer( addr, &data, 1 );
 }
 
-LmnStatus_t SX1509WriteBuffer( uint8_t addr, uint8_t *data, uint8_t size )
+uint8_t SX1509WriteBuffer( uint8_t addr, uint8_t *data, uint8_t size )
 {
     return I2cWriteMemBuffer( &I2c, I2cDeviceAddr << 1, addr, data, size );
 }
 
-LmnStatus_t SX1509Read( uint8_t addr, uint8_t *data )
+uint8_t SX1509Read( uint8_t addr, uint8_t *data )
 {
     return SX1509ReadBuffer( addr, data, 1 );
 }
 
-LmnStatus_t SX1509ReadBuffer( uint8_t addr, uint8_t *data, uint8_t size )
+uint8_t SX1509ReadBuffer( uint8_t addr, uint8_t *data, uint8_t size )
 {
     return I2cReadMemBuffer( &I2c, I2cDeviceAddr << 1, addr, data, size );
 }

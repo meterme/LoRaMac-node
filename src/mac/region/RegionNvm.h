@@ -40,26 +40,18 @@ extern "C"
 
 #include "LoRaMacTypes.h"
 
-/*!
- * Channel plan for region CN470
- */
-typedef enum eRegionCN470ChannelPlan
-{
-    CHANNEL_PLAN_UNKNOWN,
-    CHANNEL_PLAN_20MHZ_TYPE_A,
-    CHANNEL_PLAN_20MHZ_TYPE_B,
-    CHANNEL_PLAN_26MHZ_TYPE_A,
-    CHANNEL_PLAN_26MHZ_TYPE_B
-}RegionCN470ChannelPlan_t;
-
 // Selection of REGION_NVM_MAX_NB_CHANNELS
 #if defined( REGION_CN470 )
     #define REGION_NVM_MAX_NB_CHANNELS                 96
 #elif defined( REGION_US915 ) || defined( REGION_AU915 )
     #define REGION_NVM_MAX_NB_CHANNELS                 72
-#else
-    // All others
+#elif defined( REGION_AS923 ) || defined( REGION_CN779 ) || \
+      defined( REGION_EU433 ) || defined( REGION_EU868 ) || \
+      defined( REGION_IN865 ) || defined( REGION_KR920 )
     #define REGION_NVM_MAX_NB_CHANNELS                 16
+#else
+    // Region_RU864
+    #define REGION_NVM_MAX_NB_CHANNELS                 8
 #endif
 
 // Selection of REGION_NVM_MAX_NB_BANDS
@@ -84,13 +76,15 @@ typedef enum eRegionCN470ChannelPlan
  */
 typedef struct sRegionNvmDataGroup1
 {
-#if defined( REGION_US915 ) || defined( REGION_AU915 ) || defined( REGION_CN470 )
+    /*!
+     * LoRaMac bands
+     */
+    Band_t Bands[ REGION_NVM_MAX_NB_BANDS ];
+#if defined( REGION_US915 ) || defined( REGION_AU915 )
     /*!
      * LoRaMac channels remaining
      */
     uint16_t ChannelsMaskRemaining[ REGION_NVM_CHANNELS_MASK_SIZE ];
-#endif
-#if defined( REGION_US915 ) || defined( REGION_AU915 )
     /*!
      * Index of current in use 8 bit group (0: bit 0 - 7, 1: bit 8 - 15, ...,
      * 7: bit 56 - 63)
@@ -125,22 +119,6 @@ typedef struct sRegionNvmDataGroup2
      * LoRaMac channels default mask
      */
     uint16_t ChannelsDefaultMask[ REGION_NVM_CHANNELS_MASK_SIZE ];
-#if defined( REGION_CN470 )
-    /*!
-     * Holds the channel plan.
-     */
-    RegionCN470ChannelPlan_t ChannelPlan;
-    /*!
-     * Holds the common join channel, if its an OTAA device, otherwise
-     * this value is 0.
-     */
-    uint8_t CommonJoinChannelIndex;
-    /*!
-     * Identifier which specifies if the device is an OTAA device. Set
-     * to true, if its an OTAA device.
-     */
-    bool IsOtaaDevice;
-#endif
     /*!
      * CRC32 value of the Region data structure.
      */

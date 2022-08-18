@@ -51,115 +51,115 @@ void I2cResetBus( I2c_t *obj )
     I2cMcuResetBus( obj );
 }
 
-LmnStatus_t I2cWrite( I2c_t *obj, uint8_t deviceAddr, uint8_t data )
+uint8_t I2cWrite( I2c_t *obj, uint8_t deviceAddr, uint8_t data )
 {
     if( I2cInitialized == true )
     {
-        if( I2cMcuWriteBuffer( obj, deviceAddr, &data, 1 ) == LMN_STATUS_ERROR )
+        if( I2cMcuWriteBuffer( obj, deviceAddr, &data, 1 ) == FAIL )
         {
             // if first attempt fails due to an IRQ, try a second time
-            if( I2cMcuWriteBuffer( obj, deviceAddr, &data, 1 ) == LMN_STATUS_ERROR )
+            if( I2cMcuWriteBuffer( obj, deviceAddr, &data, 1 ) == FAIL )
             {
-                return LMN_STATUS_ERROR;
+                return FAIL;
             }
             else
             {
-                return LMN_STATUS_OK;
+                return SUCCESS;
             }
         }
         else
         {
-            return LMN_STATUS_OK;
+            return SUCCESS;
         }
     }
     else
     {
-        return LMN_STATUS_ERROR;
+        return FAIL;
     }
 }
 
-LmnStatus_t I2cWriteBuffer( I2c_t *obj, uint8_t deviceAddr, uint8_t *buffer, uint16_t size )
+uint8_t I2cWriteBuffer( I2c_t *obj, uint8_t deviceAddr, uint8_t *buffer, uint16_t size )
 {
     if( I2cInitialized == true )
     {
-        if( I2cMcuWriteBuffer( obj, deviceAddr, buffer, size ) == LMN_STATUS_ERROR )
+        if( I2cMcuWriteBuffer( obj, deviceAddr, buffer, size ) == FAIL )
         {
             // if first attempt fails due to an IRQ, try a second time
-            if( I2cMcuWriteBuffer( obj, deviceAddr, buffer, size ) == LMN_STATUS_ERROR )
+            if( I2cMcuWriteBuffer( obj, deviceAddr, buffer, size ) == FAIL )
             {
-                return LMN_STATUS_ERROR;
+                return FAIL;
             }
             else
             {
-                return LMN_STATUS_OK;
+                return SUCCESS;
             }
         }
         else
         {
-            return LMN_STATUS_OK;
+            return SUCCESS;
         }
     }
     else
     {
-        return LMN_STATUS_ERROR;
+        return FAIL;
     }
 }
 
-LmnStatus_t I2cWriteMem( I2c_t *obj, uint8_t deviceAddr, uint16_t addr, uint8_t data )
+uint8_t I2cWriteMem( I2c_t *obj, uint8_t deviceAddr, uint16_t addr, uint8_t data )
 {
     if( I2cInitialized == true )
     {
-        if( I2cMcuWriteMemBuffer( obj, deviceAddr, addr, &data, 1 ) == LMN_STATUS_ERROR )
+        if( I2cMcuWriteMemBuffer( obj, deviceAddr, addr, &data, 1 ) == FAIL )
         {
             // if first attempt fails due to an IRQ, try a second time
-            if( I2cMcuWriteMemBuffer( obj, deviceAddr, addr, &data, 1 ) == LMN_STATUS_ERROR )
+            if( I2cMcuWriteMemBuffer( obj, deviceAddr, addr, &data, 1 ) == FAIL )
             {
-                return LMN_STATUS_ERROR;
+                return FAIL;
             }
             else
             {
-                return LMN_STATUS_OK;
+                return SUCCESS;
             }
         }
         else
         {
-            return LMN_STATUS_OK;
+            return SUCCESS;
         }
     }
     else
     {
-        return LMN_STATUS_ERROR;
+        return FAIL;
     }
 }
 
-LmnStatus_t I2cWriteMemBuffer( I2c_t *obj, uint8_t deviceAddr, uint16_t addr, uint8_t *buffer, uint16_t size )
+uint8_t I2cWriteMemBuffer( I2c_t *obj, uint8_t deviceAddr, uint16_t addr, uint8_t *buffer, uint16_t size )
 {
     if( I2cInitialized == true )
     {
-        if( I2cMcuWriteMemBuffer( obj, deviceAddr, addr, buffer, size ) == LMN_STATUS_ERROR )
+        if( I2cMcuWriteMemBuffer( obj, deviceAddr, addr, buffer, size ) == FAIL )
         {
             // if first attempt fails due to an IRQ, try a second time
-            if( I2cMcuWriteMemBuffer( obj, deviceAddr, addr, buffer, size ) == LMN_STATUS_ERROR )
+            if( I2cMcuWriteMemBuffer( obj, deviceAddr, addr, buffer, size ) == FAIL )
             {
-                return LMN_STATUS_ERROR;
+                return FAIL;
             }
             else
             {
-                return LMN_STATUS_OK;
+                return SUCCESS;
             }
         }
         else
         {
-            return LMN_STATUS_OK;
+            return SUCCESS;
         }
     }
     else
     {
-        return LMN_STATUS_ERROR;
+        return FAIL;
     }
 }
 
-LmnStatus_t I2cRead( I2c_t *obj, uint8_t deviceAddr, uint8_t *data )
+uint8_t I2cRead( I2c_t *obj, uint8_t deviceAddr, uint8_t *data )
 {
     if( I2cInitialized == true )
     {
@@ -167,11 +167,11 @@ LmnStatus_t I2cRead( I2c_t *obj, uint8_t deviceAddr, uint8_t *data )
     }
     else
     {
-        return LMN_STATUS_ERROR;
+        return FAIL;
     }
 }
 
-LmnStatus_t I2cReadBuffer( I2c_t *obj, uint8_t deviceAddr, uint8_t *buffer, uint16_t size )
+uint8_t I2cReadBuffer( I2c_t *obj, uint8_t deviceAddr, uint8_t *buffer, uint16_t size )
 {
     if( I2cInitialized == true )
     {
@@ -179,11 +179,11 @@ LmnStatus_t I2cReadBuffer( I2c_t *obj, uint8_t deviceAddr, uint8_t *buffer, uint
     }
     else
     {
-        return LMN_STATUS_ERROR;
+        return FAIL;
     }
 }
 
-LmnStatus_t I2cReadMem( I2c_t *obj, uint8_t deviceAddr, uint16_t addr, uint8_t *data )
+uint8_t I2cReadMem( I2c_t *obj, uint8_t deviceAddr, uint16_t addr, uint8_t *data )
 {
     if( I2cInitialized == true )
     {
@@ -191,11 +191,11 @@ LmnStatus_t I2cReadMem( I2c_t *obj, uint8_t deviceAddr, uint16_t addr, uint8_t *
     }
     else
     {
-        return LMN_STATUS_ERROR;
+        return FAIL;
     }
 }
 
-LmnStatus_t I2cReadMemBuffer( I2c_t *obj, uint8_t deviceAddr, uint16_t addr, uint8_t *buffer, uint16_t size )
+uint8_t I2cReadMemBuffer( I2c_t *obj, uint8_t deviceAddr, uint16_t addr, uint8_t *buffer, uint16_t size )
 {
     if( I2cInitialized == true )
     {
@@ -203,6 +203,6 @@ LmnStatus_t I2cReadMemBuffer( I2c_t *obj, uint8_t deviceAddr, uint16_t addr, uin
     }
     else
     {
-        return LMN_STATUS_ERROR;
+        return FAIL;
     }
 }

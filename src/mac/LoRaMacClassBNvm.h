@@ -73,10 +73,6 @@ typedef struct sLoRaMacClassBPingSlotNvmData
      * Datarate of the ping slot
      */
     int8_t Datarate;
-    /*!
-     * Set to 1, if the FPending bit is set
-     */
-    uint8_t FPendingSet;
 } LoRaMacClassBPingSlotNvmData_t;
 
 /*!

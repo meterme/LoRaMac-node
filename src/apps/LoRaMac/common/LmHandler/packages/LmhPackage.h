@@ -21,10 +21,6 @@
 #ifndef __LMH_PACKAGE_H__
 #define __LMH_PACKAGE_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdint.h>
 #include <stdbool.h>
 #include "LmHandlerTypes.h"
@@ -59,12 +55,12 @@ typedef struct LmhPackage_s
      */
     bool ( *IsInitialized )( void );
     /*!
-     * Returns if a package transmission is pending or not.
+     * Returns the package operation status.
      *
-     * \retval status Package transmission status
-     *                [true: pending, false: Not pending]
+     * \retval status Package operation status
+     *                [true: Running, false: Not running]
      */
-    bool ( *IsTxPending )( void );
+    bool ( *IsRunning )( void );
     /*!
      * Processes the internal package events.
      */
@@ -121,10 +117,20 @@ typedef struct LmhPackage_s
     * Join a LoRa Network in classA
     *
     * \Note if the device is ABP, this is a pass through function
-    *
+    * 
     * \param [IN] isOtaa Indicates which activation mode must be used
     */
     void ( *OnJoinRequest )( bool isOtaa );
+    /*!
+     * Instructs the MAC layer to send a ClassA uplink
+     *
+     * \param [IN] appData Data to be sent
+     * \param [IN] isTxConfirmed Indicates if the uplink requires an acknowledgement
+     *
+     * \retval status Returns \ref LORAMAC_HANDLER_SUCCESS if request has been
+     *                processed else \ref LORAMAC_HANDLER_ERROR
+     */
+    LmHandlerErrorStatus_t ( *OnSendRequest )( LmHandlerAppData_t *appData, LmHandlerMsgTypes_t isTxConfirmed );
     /*!
     * Requests network server time update
     *
@@ -146,9 +152,5 @@ typedef struct LmhPackage_s
     void ( *OnSysTimeUpdate )( void );
 #endif
 }LmhPackage_t;
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif // __LMH_PACKAGE_H__

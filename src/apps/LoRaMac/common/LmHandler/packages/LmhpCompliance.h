@@ -21,10 +21,6 @@
 #ifndef __LMHP_COMPLIANCE__
 #define __LMHP_COMPLIANCE__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "LoRaMac.h"
 #include "LmHandlerTypes.h"
 #include "LmhPackage.h"
@@ -42,27 +38,31 @@ extern "C" {
 typedef struct LmhpComplianceParams_s
 {
     /*!
-     * Current firmware version
+     * Holds the ADR state
      */
-    Version_t FwVersion;
+    bool AdrEnabled;
     /*!
-     *
-     */
-    void ( *OnTxPeriodicityChanged )( uint32_t periodicity );
+    * LoRaWAN ETSI duty cycle control enable/disable
+    *
+    * \remark Please note that ETSI mandates duty cycled transmissions. Use only for test purposes
+    */
+    bool DutyCycleEnabled;
     /*!
+     * Stops unnecessary peripherals.
      *
+     * \remark Use for the compliance tests protocol handling in order to
+     *         reduce the power consumption.
      */
-    void ( *OnTxFrameCtrlChanged )( LmHandlerMsgTypes_t isTxConfirmed );
+    void ( *StopPeripherals )( void );
     /*!
+     * Starts previously stopped peripherals.
      *
+     * \remark Use for the compliance tests protocol handling in order to
+     *         reduce the power consumption.
      */
-    void ( *OnPingSlotPeriodicityChanged )( uint8_t pingSlotPeriodicity );
+    void ( *StartPeripherals )( void );
 }LmhpComplianceParams_t;
 
 LmhPackage_t *LmphCompliancePackageFactory( void );
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif // __LMHP_COMPLIANCE__

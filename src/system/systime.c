@@ -142,7 +142,7 @@ SysTime_t SysTimeGetMcuTime( void )
     return calendarTime;
 }
 
-TimerTime_t SysTimeToMs( SysTime_t sysTime )
+uint32_t SysTimeToMs( SysTime_t sysTime )
 {
     uint32_t seconds;
     uint32_t subSeconds;
@@ -153,10 +153,10 @@ TimerTime_t SysTimeToMs( SysTime_t sysTime )
 
     SysTime_t calendarTime = SysTimeSub( sysTime, deltaTime );
 
-    return ( TimerTime_t )( calendarTime.Seconds * 1000 + calendarTime.SubSeconds );
+    return calendarTime.Seconds * 1000 + calendarTime.SubSeconds;
 }
 
-SysTime_t SysTimeFromMs( TimerTime_t timeMs )
+SysTime_t SysTimeFromMs( uint32_t timeMs )
 {
     uint32_t seconds = timeMs / 1000;
     uint32_t subSeconds = timeMs - seconds * 1000;

@@ -31,6 +31,8 @@ extern "C"
 #endif
 
 #include "LmHandlerTypes.h"
+#include "LmhpCompliance.h"
+
 
 typedef struct LmHandlerJoinParams_s
 {
@@ -65,12 +67,12 @@ typedef struct LmHandlerRxParams_s
     int8_t RxSlot;
 }LmHandlerRxParams_t;
 
-typedef struct LoRaMacHandlerBeaconParams_s
+typedef struct LoRaMAcHandlerBeaconParams_s
 {
     LoRaMacEventInfoStatus_t Status;
     LmHandlerBeaconState_t State;
     BeaconInfo_t Info;
-}LoRaMacHandlerBeaconParams_t;
+}LoRaMAcHandlerBeaconParams_t;
 
 typedef struct LmHandlerParams_s
 {
@@ -83,10 +85,6 @@ typedef struct LmHandlerParams_s
      */
     bool AdrEnable;
     /*!
-     * Uplink frame type
-     */
-    LmHandlerMsgTypes_t IsTxConfirmed;
-    /*!
      * Uplink datarate, when \ref AdrEnable is OFF
      */
     int8_t TxDatarate;
@@ -95,10 +93,10 @@ typedef struct LmHandlerParams_s
      */
     bool PublicNetworkEnable;
     /*!
-     * LoRaWAN ETSI duty cycle control enable/disable
-     *
-     * \remark Please note that ETSI mandates duty cycled transmissions. Use only for test purposes
-     */
+    * LoRaWAN ETSI duty cycle control enable/disable
+    *
+    * \remark Please note that ETSI mandates duty cycled transmissions. Use only for test purposes
+    */
     bool DutyCycleEnabled;
     /*!
      * Application data buffer maximum size
@@ -108,10 +106,6 @@ typedef struct LmHandlerParams_s
      * Application data buffer pointer
      */
     uint8_t *DataBuffer;
-    /*!
-     * Class B ping-slot periodicity.
-     */
-    uint8_t PingSlotPeriodicity;
 }LmHandlerParams_t;
 
 typedef struct LmHandlerCallbacks_s
@@ -202,7 +196,7 @@ typedef struct LmHandlerCallbacks_s
      *
      * \param [IN] params notification parameters
      */
-    void ( *OnBeaconStatusChange )( LoRaMacHandlerBeaconParams_t *params );
+    void ( *OnBeaconStatusChange )( LoRaMAcHandlerBeaconParams_t *params );
 #if( LMH_SYS_TIME_UPDATE_NEW_API == 1 )
     /*!
      * Notifies the upper layer that the system time has been updated.
@@ -244,13 +238,6 @@ bool LmHandlerIsBusy( void );
  * \remark This function must be called in the main loop.
  */
 void LmHandlerProcess( void );
-
-/*!
- * Gets current duty-cycle wait time
- *
- * \retval time to wait in ms
- */
-TimerTime_t LmHandlerGetDutyCycleWaitTime( void );
 
 /*!
  * Instructs the MAC layer to send a ClassA uplink
@@ -334,13 +321,6 @@ LoRaMacRegion_t LmHandlerGetActiveRegion( void );
  */
 LmHandlerErrorStatus_t LmHandlerSetSystemMaxRxError( uint32_t maxErrorInMs );
 
-/*!
- * Requests network server time update
- *
- * \retval status Returns \ref LORAMAC_HANDLER_SET if joined else \ref LORAMAC_HANDLER_RESET
- */
-LmHandlerErrorStatus_t LmHandlerDeviceTimeReq( void );
-
 /*
  *=============================================================================
  * PACKAGES HANDLING
@@ -348,6 +328,7 @@ LmHandlerErrorStatus_t LmHandlerDeviceTimeReq( void );
  */
 LmHandlerErrorStatus_t LmHandlerPackageRegister( uint8_t id, void *params );
 bool LmHandlerPackageIsInitialized( uint8_t id );
+bool LmHandlerPackageIsRunning( uint8_t id );
 
 #ifdef __cplusplus
 }

@@ -112,7 +112,7 @@ void I2cMcuResetBus( I2c_t *obj );
  * \param [IN] buffer           data buffer to write
  * \param [IN] size             number of data bytes to write
  */
-LmnStatus_t I2cMcuWriteBuffer( I2c_t *obj, uint8_t deviceAddr, uint8_t *buffer, uint16_t size );
+uint8_t I2cMcuWriteBuffer( I2c_t *obj, uint8_t deviceAddr, uint8_t *buffer, uint16_t size );
 
 /*!
  * \brief Read data buffer from the I2C device
@@ -122,7 +122,7 @@ LmnStatus_t I2cMcuWriteBuffer( I2c_t *obj, uint8_t deviceAddr, uint8_t *buffer, 
  * \param [IN] buffer           data buffer to read
  * \param [IN] size             number of data bytes to read
  */
-LmnStatus_t I2cMcuReadBuffer( I2c_t *obj, uint8_t deviceAddr, uint8_t *buffer, uint16_t size );
+uint8_t I2cMcuReadBuffer( I2c_t *obj, uint8_t deviceAddr, uint8_t *buffer, uint16_t size );
 
 /*!
  * \brief Write data buffer starting at addr to the I2C device
@@ -133,7 +133,7 @@ LmnStatus_t I2cMcuReadBuffer( I2c_t *obj, uint8_t deviceAddr, uint8_t *buffer, u
  * \param [IN] buffer           data buffer to write
  * \param [IN] size             number of data bytes to write
  */
-LmnStatus_t I2cMcuWriteMemBuffer( I2c_t *obj, uint8_t deviceAddr, uint16_t addr, uint8_t *buffer, uint16_t size );
+uint8_t I2cMcuWriteMemBuffer( I2c_t *obj, uint8_t deviceAddr, uint16_t addr, uint8_t *buffer, uint16_t size );
 
 /*!
  * \brief Read data buffer starting at addr from the I2C device
@@ -144,7 +144,7 @@ LmnStatus_t I2cMcuWriteMemBuffer( I2c_t *obj, uint8_t deviceAddr, uint16_t addr,
  * \param [IN] buffer           data buffer to read
  * \param [IN] size             number of data bytes to read
  */
-LmnStatus_t I2cMcuReadMemBuffer( I2c_t *obj, uint8_t deviceAddr, uint16_t addr, uint8_t *buffer, uint16_t size );
+uint8_t I2cMcuReadMemBuffer( I2c_t *obj, uint8_t deviceAddr, uint16_t addr, uint8_t *buffer, uint16_t size );
 
 /*!
  * \brief Waits until the given device is in standby mode
@@ -152,7 +152,7 @@ LmnStatus_t I2cMcuReadMemBuffer( I2c_t *obj, uint8_t deviceAddr, uint16_t addr, 
  * \param [IN] obj              I2C object
  * \param [IN] deviceAddr       device address
  */
-LmnStatus_t I2cMcuWaitStandbyState( I2c_t *obj, uint8_t deviceAddr );
+uint8_t I2cMcuWaitStandbyState( I2c_t *obj, uint8_t deviceAddr );
 
 /*!
  * \brief Sets the internal device address size

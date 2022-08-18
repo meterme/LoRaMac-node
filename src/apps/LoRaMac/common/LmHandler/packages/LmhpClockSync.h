@@ -22,10 +22,6 @@
 #ifndef __LMHP_CLOCK_SYNC_H__
 #define __LMHP_CLOCK_SYNC_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "LoRaMac.h"
 #include "LmHandlerTypes.h"
 #include "LmhPackage.h"
@@ -49,9 +45,5 @@ extern "C" {
 LmhPackage_t *LmphClockSyncPackageFactory( void );
 
 LmHandlerErrorStatus_t LmhpClockSyncAppTimeReq( void );
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif // __LMHP_CLOCK_SYNC_H__

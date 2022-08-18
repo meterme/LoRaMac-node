@@ -22,10 +22,6 @@
 #ifndef __LMHP_REMOTE_MCAST_SETUP_H__
 #define __LMHP_REMOTE_MCAST_SETUP_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "LoRaMac.h"
 #include "LmHandlerTypes.h"
 #include "LmhPackage.h"
@@ -47,9 +43,5 @@ extern "C" {
 //}LmhpRemoteMcastSetupParams_t;
 
 LmhPackage_t *LmhpRemoteMcastSetupPackageFactory( void );
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif // __LMHP_REMOTE_MCAST_SETUP_H__

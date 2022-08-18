@@ -19,10 +19,6 @@
 #ifndef __COMMISSIONING_H__
 #define __COMMISSIONING_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /*!
  ******************************************************************************
  ********************************** WARNING ***********************************
@@ -50,10 +46,9 @@ extern "C" {
  * When using ABP activation the MAC layer must know in advance to which server
  * version it will be connected.
  */
-#define ABP_ACTIVATION_LRWAN_VERSION_V10x                  0x01000400 // 1.0.4.0
-#define ABP_ACTIVATION_LRWAN_VERSION_V11x                  0x01010100 // 1.1.1.0
+#define ABP_ACTIVATION_LRWAN_VERSION_V10x                  0x01000300 // 1.0.3.0
 
-#define ABP_ACTIVATION_LRWAN_VERSION                       ABP_ACTIVATION_LRWAN_VERSION_V11x
+#define ABP_ACTIVATION_LRWAN_VERSION                       ABP_ACTIVATION_LRWAN_VERSION_V10x
 
 /*!
  * Indicates if the end-device is to be connected to a private or public network
@@ -64,9 +59,5 @@ extern "C" {
  * Current network ID
  */
 #define LORAWAN_NETWORK_ID                                 ( uint32_t )0
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif // __COMMISSIONING_H__

@@ -53,29 +53,25 @@ extern "C"
 /*!
  * Indicates if LoRaWAN 1.1.x crypto scheme is enabled
  */
-#define USE_LRWAN_1_1_X_CRYPTO                      1
+#define USE_LRWAN_1_1_X_CRYPTO                      0
 
 /*!
  * Indicates if a random devnonce must be used or not
  */
-#define USE_RANDOM_DEV_NONCE                        0
+#define USE_RANDOM_DEV_NONCE                        1
 
 /*!
- * Indicates if JoinNonce is counter based and requires to be checked on 1.0.x devices
- * \remark Only applies to LoRaWAN 1.0.x when following recomendations provided
- *         by "Technical Recommendations for Preventing State Synchronization
- *         Issues around LoRaWAN® 1.0.x Join Procedure" 
- *         https://lora-alliance.org/wp-content/uploads/2020/11/lorawan-1.0.x-join-synch-issues-remedies-v1.0.0.pdf
+ * Indicates if JoinNonce is counter based and requires to be checked
  */
-#define USE_10X_JOIN_NONCE_COUNTER_CHECK            0
+#define USE_JOIN_NONCE_COUNTER_CHECK                0
 
 /*!
  * Initial value of the frame counters
  */
-#define FCNT_DOWN_INITIAL_VALUE          0xFFFFFFFF
+#define FCNT_DOWN_INITAL_VALUE          0xFFFFFFFF
 
 /*!
- * LoRaMac Crypto Status
+ * LoRaMac Cryto Status
  */
 typedef enum eLoRaMacCryptoStatus
 {
@@ -111,6 +107,10 @@ typedef enum eLoRaMacCryptoStatus
      * FCntUp/Down check failed (duplicated)
      */
     LORAMAC_CRYPTO_FAIL_FCNT_DUPLICATED,
+    /*!
+     * MAX_GAP_FCNT check failed
+     */
+    LORAMAC_CRYPTO_FAIL_MAX_GAP_FCNT,
     /*!
      * Not allowed parameter value
      */
@@ -190,11 +190,12 @@ LoRaMacCryptoStatus_t LoRaMacCryptoSetLrWanVersion( Version_t version );
  * Returns updated fCntID downlink counter value.
  *
  * \param[IN]     fCntID         - Frame counter identifier
+ * \param[IN]     maxFcntGap     - Maximum allowed frame counter difference (only necessary for L2 LW1.0.x)
  * \param[IN]     frameFcnt      - Received frame counter (used to update current counter value)
  * \param[OUT]    currentDown    - Current downlink counter value
  * \retval                       - Status of the operation
  */
-LoRaMacCryptoStatus_t LoRaMacCryptoGetFCntDown( FCntIdentifier_t fCntID, uint32_t frameFcnt, uint32_t* currentDown );
+LoRaMacCryptoStatus_t LoRaMacCryptoGetFCntDown( FCntIdentifier_t fCntID, uint16_t maxFCntGap, uint32_t frameFcnt, uint32_t* currentDown );
 
 /*!
  * Returns updated fCntUp uplink counter value.
@@ -203,16 +204,6 @@ LoRaMacCryptoStatus_t LoRaMacCryptoGetFCntDown( FCntIdentifier_t fCntID, uint32_
  * \retval                       - Status of the operation
  */
 LoRaMacCryptoStatus_t LoRaMacCryptoGetFCntUp( uint32_t* currentUp );
-
-/*!
- * Computes next RJcount0 or RJcount1 counter value.
- *
- * \param[IN]     fCntID          - Frame counter identifier
- * \param[OUT]    rJcount         - RJcount value
- *
- * \retval                        - Status of the operation
- */
-LoRaMacCryptoStatus_t LoRaMacCryptoGetRJcount( FCntIdentifier_t fCntID, uint16_t* rJcount );
 
 /*!
  * Provides multicast context.

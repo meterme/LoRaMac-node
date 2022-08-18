@@ -40,7 +40,6 @@
  */
 static RegionNvmDataGroup1_t* RegionNvmGroup1;
 static RegionNvmDataGroup2_t* RegionNvmGroup2;
-static Band_t* RegionBands;
 
 // Static functions
 static bool VerifyRfFreq( uint32_t freq )
@@ -166,9 +165,14 @@ PhyParam_t RegionRU864GetPhyParam( GetPhyParams_t* getPhy )
             phyParam.Value = REGION_COMMON_DEFAULT_JOIN_ACCEPT_DELAY2;
             break;
         }
-        case PHY_RETRANSMIT_TIMEOUT:
+        case PHY_MAX_FCNT_GAP:
         {
-            phyParam.Value = ( REGION_COMMON_DEFAULT_RETRANSMIT_TIMEOUT + randr( -REGION_COMMON_DEFAULT_RETRANSMIT_TIMEOUT_RND, REGION_COMMON_DEFAULT_RETRANSMIT_TIMEOUT_RND ) );
+            phyParam.Value = REGION_COMMON_DEFAULT_MAX_FCNT_GAP;
+            break;
+        }
+        case PHY_ACK_TIMEOUT:
+        {
+            phyParam.Value = ( REGION_COMMON_DEFAULT_ACK_TIMEOUT + randr( -REGION_COMMON_DEFAULT_ACK_TIMEOUT_RND, REGION_COMMON_DEFAULT_ACK_TIMEOUT_RND ) );
             break;
         }
         case PHY_DEF_DR1_OFFSET:
@@ -274,7 +278,7 @@ PhyParam_t RegionRU864GetPhyParam( GetPhyParams_t* getPhy )
 
 void RegionRU864SetBandTxDone( SetBandTxDoneParams_t* txDone )
 {
-    RegionCommonSetBandTxDone( &RegionBands[RegionNvmGroup2->Channels[txDone->Channel].Band],
+    RegionCommonSetBandTxDone( &RegionNvmGroup1->Bands[RegionNvmGroup2->Channels[txDone->Channel].Band],
                                txDone->LastTxAirTime, txDone->Joined, txDone->ElapsedTimeSinceStartUp );
 }
 
@@ -296,10 +300,9 @@ void RegionRU864InitDefaults( InitDefaultsParams_t* params )
 
             RegionNvmGroup1 = (RegionNvmDataGroup1_t*) params->NvmGroup1;
             RegionNvmGroup2 = (RegionNvmDataGroup2_t*) params->NvmGroup2;
-            RegionBands = (Band_t*) params->Bands;
 
             // Default bands
-            memcpy1( ( uint8_t* )RegionBands, ( uint8_t* )bands, sizeof( Band_t ) * RU864_MAX_NB_BANDS );
+            memcpy1( ( uint8_t* )RegionNvmGroup1->Bands, ( uint8_t* )bands, sizeof( Band_t ) * RU864_MAX_NB_BANDS );
 
             // Default channels
             RegionNvmGroup2->Channels[0] = ( ChannelParams_t ) RU864_LC1;
@@ -518,7 +521,7 @@ bool RegionRU864TxConfig( TxConfigParams_t* txConfig, int8_t* txPower, TimerTime
 {
     RadioModems_t modem;
     int8_t phyDr = DataratesRU864[txConfig->Datarate];
-    int8_t txPowerLimited = RegionCommonLimitTxPower( txConfig->TxPower, RegionBands[RegionNvmGroup2->Channels[txConfig->Channel].Band].TxMaxPower );
+    int8_t txPowerLimited = RegionCommonLimitTxPower( txConfig->TxPower, RegionNvmGroup1->Bands[RegionNvmGroup2->Channels[txConfig->Channel].Band].TxMaxPower );
     uint32_t bandwidth = RegionCommonGetBandwidth( txConfig->Datarate, BandwidthsRU864 );
     int8_t phyTxPower = 0;
 
@@ -742,11 +745,6 @@ int8_t RegionRU864DlChannelReq( DlChannelReqParams_t* dlChannelReq )
 {
     uint8_t status = 0x03;
 
-    if( dlChannelReq->ChannelId >= ( CHANNELS_MASK_SIZE * 16 ) )
-    {
-        return 0;
-    }
-
     // Verify if the frequency is supported
     if( VerifyRfFreq( dlChannelReq->Rx1Frequency ) == false )
     {
@@ -793,7 +791,7 @@ LoRaMacStatus_t RegionRU864NextChannel( NextChanParams_t* nextChanParams, uint8_
     countChannelsParams.Datarate = nextChanParams->Datarate;
     countChannelsParams.ChannelsMask = RegionNvmGroup2->ChannelsMask;
     countChannelsParams.Channels = RegionNvmGroup2->Channels;
-    countChannelsParams.Bands = RegionBands;
+    countChannelsParams.Bands = RegionNvmGroup1->Bands;
     countChannelsParams.MaxNbChannels = RU864_MAX_NB_CHANNELS;
     countChannelsParams.JoinChannels = &joinChannels;
 
@@ -896,6 +894,18 @@ bool RegionRU864ChannelsRemove( ChannelRemoveParams_t* channelRemove  )
     RegionNvmGroup2->Channels[id] = ( ChannelParams_t ){ 0, 0, { 0 }, 0 };
 
     return RegionCommonChanDisable( RegionNvmGroup2->ChannelsMask, id, RU864_MAX_NB_CHANNELS );
+}
+
+void RegionRU864SetContinuousWave( ContinuousWaveParams_t* continuousWave )
+{
+    int8_t txPowerLimited = RegionCommonLimitTxPower( continuousWave->TxPower, RegionNvmGroup1->Bands[RegionNvmGroup2->Channels[continuousWave->Channel].Band].TxMaxPower );
+    int8_t phyTxPower = 0;
+    uint32_t frequency = RegionNvmGroup2->Channels[continuousWave->Channel].Frequency;
+
+    // Calculate physical TX power
+    phyTxPower = RegionCommonComputeTxPower( txPowerLimited, continuousWave->MaxEirp, continuousWave->AntennaGain );
+
+    Radio.SetTxContinuousWave( frequency, phyTxPower, continuousWave->Timeout );
 }
 
 uint8_t RegionRU864ApplyDrOffset( uint8_t downlinkDwellTime, int8_t dr, int8_t drOffset )

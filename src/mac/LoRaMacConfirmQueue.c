@@ -172,7 +172,7 @@ bool LoRaMacConfirmQueueAdd( MlmeConfirmQueue_t* mlmeConfirm )
     ConfirmQueueCtx.BufferEnd->Request = mlmeConfirm->Request;
     ConfirmQueueCtx.BufferEnd->Status = mlmeConfirm->Status;
     ConfirmQueueCtx.BufferEnd->RestrictCommonReadyToHandle = mlmeConfirm->RestrictCommonReadyToHandle;
-    ConfirmQueueCtx.BufferEnd->ReadyToHandle = mlmeConfirm->ReadyToHandle;
+    ConfirmQueueCtx.BufferEnd->ReadyToHandle = false;
     // Increase counter
     ConfirmQueueCtx.Nvm.MlmeConfirmQueueCnt++;
     // Update end pointer

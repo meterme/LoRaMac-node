@@ -52,10 +52,9 @@ typedef enum
  *
  * \param [IN]:    addr
  * \param [IN]:    data
- *
- * \retval status [LMN_STATUS_OK, LMN_STATUS_ERROR]
+ * \retval status [SUCCESS, FAIL]
  */
-LmnStatus_t MPL3115Write( uint8_t addr, uint8_t data );
+uint8_t MPL3115Write( uint8_t addr, uint8_t data );
 
 /*!
  * \brief Writes a buffer at specified address in the device
@@ -63,20 +62,18 @@ LmnStatus_t MPL3115Write( uint8_t addr, uint8_t data );
  * \param [IN]: addr
  * \param [IN]: data
  * \param [IN]: size
- *
- * \retval status [LMN_STATUS_OK, LMN_STATUS_ERROR]
+ * \retval status [SUCCESS, FAIL]
  */
-LmnStatus_t MPL3115WriteBuffer( uint8_t addr, uint8_t *data, uint8_t size );
+uint8_t MPL3115WriteBuffer( uint8_t addr, uint8_t *data, uint8_t size );
 
 /*!
  * \brief Reads a byte at specified address in the device
  *
  * \param [IN]: addr
  * \param [OUT]: data
- *
- * \retval status [LMN_STATUS_OK, LMN_STATUS_ERROR]
+ * \retval status [SUCCESS, FAIL]
  */
-LmnStatus_t MPL3115Read( uint8_t addr, uint8_t *data );
+uint8_t MPL3115Read( uint8_t addr, uint8_t *data );
 
 /*!
  * \brief Reads a buffer at specified address in the device
@@ -84,10 +81,9 @@ LmnStatus_t MPL3115Read( uint8_t addr, uint8_t *data );
  * \param [IN]: addr
  * \param [OUT]: data
  * \param [IN]: size
- *
- * \retval status [LMN_STATUS_OK, LMN_STATUS_ERROR]
+ * \retval status [SUCCESS, FAIL]
  */
-LmnStatus_t MPL3115ReadBuffer( uint8_t addr, uint8_t *data, uint8_t size );
+uint8_t MPL3115ReadBuffer( uint8_t addr, uint8_t *data, uint8_t size );
 
 /*!
  * \brief Sets the I2C device slave address
@@ -129,7 +125,7 @@ void MPL3115SetModeActive( void );
  */
 void MPL3115ToggleOneShot( void );
 
-LmnStatus_t MPL3115Init( void )
+uint8_t MPL3115Init( void )
 {
     uint8_t regVal = 0;
 
@@ -145,42 +141,42 @@ LmnStatus_t MPL3115Init( void )
         MPL3115Read( MPL3115_ID, &regVal );
         if( regVal != 0xC4 )
         {
-            return LMN_STATUS_ERROR;
+            return FAIL;
         }
 
         MPL3115Write( PT_DATA_CFG_REG, DREM | PDEFE | TDEFE );      // Enable data ready flags for pressure and temperature )
         MPL3115Write( CTRL_REG1, ALT | OS_32 | SBYB );              // Set sensor to active state with oversampling ratio 128 (512 ms between samples)
         MPL3115Initialized = true;
     }
-    return LMN_STATUS_OK;
+    return SUCCESS;
 }
 
-LmnStatus_t MPL3115Reset( void )
+uint8_t MPL3115Reset( void )
 {
     // Reset all registers to POR values
-    if( MPL3115Write( CTRL_REG1, RST ) == LMN_STATUS_OK )
+    if( MPL3115Write( CTRL_REG1, RST ) == SUCCESS )
     {
-        return LMN_STATUS_OK;
+        return SUCCESS;
     }
-    return LMN_STATUS_ERROR;
+    return FAIL;
 }
 
-LmnStatus_t MPL3115Write( uint8_t addr, uint8_t data )
+uint8_t MPL3115Write( uint8_t addr, uint8_t data )
 {
     return MPL3115WriteBuffer( addr, &data, 1 );
 }
 
-LmnStatus_t MPL3115WriteBuffer( uint8_t addr, uint8_t *data, uint8_t size )
+uint8_t MPL3115WriteBuffer( uint8_t addr, uint8_t *data, uint8_t size )
 {
     return I2cWriteMemBuffer( &I2c, I2cDeviceAddr << 1, addr, data, size );
 }
 
-LmnStatus_t MPL3115Read( uint8_t addr, uint8_t *data )
+uint8_t MPL3115Read( uint8_t addr, uint8_t *data )
 {
     return MPL3115ReadBuffer( addr, data, 1 );
 }
 
-LmnStatus_t MPL3115ReadBuffer( uint8_t addr, uint8_t *data, uint8_t size )
+uint8_t MPL3115ReadBuffer( uint8_t addr, uint8_t *data, uint8_t size )
 {
     return I2cReadMemBuffer( &I2c, I2cDeviceAddr << 1, addr, data, size );
 }
@@ -340,7 +336,7 @@ float MPL3115ReadTemperature( void )
 
     if( msb > 0x7F )
     {
-        val = ~( ( msb << 8 ) + lsb ) + 1;      // 2's complement
+        val = ~( ( msb << 8 ) + lsb ) + 1;      // 2’s complement
         msb = val >> 8;
         lsb = val & 0x00F0;
         negSign = true;

@@ -169,7 +169,7 @@ extern "C"
 /*!
  * Size of RFU 1 field
  */
-#define EU868_RFU1_SIZE                             1
+#define EU868_RFU1_SIZE                             2
 
 /*!
  * Size of RFU 2 field
@@ -448,6 +448,13 @@ LoRaMacStatus_t RegionEU868ChannelAdd( ChannelAddParams_t* channelAdd );
  * \retval Returns true, if the channel was removed successfully.
  */
 bool RegionEU868ChannelsRemove( ChannelRemoveParams_t* channelRemove  );
+
+/*!
+ * \brief Sets the radio into continuous wave mode.
+ *
+ * \param [IN] continuousWave Pointer to the function parameters.
+ */
+void RegionEU868SetContinuousWave( ContinuousWaveParams_t* continuousWave );
 
 /*!
  * \brief Computes new datarate according to the given offset

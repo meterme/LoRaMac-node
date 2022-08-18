@@ -31,13 +31,15 @@ extern "C"
 #include <stdint.h>
 
 /*!
- * LMN (LoRaMac-node) status
+ * Generic definition
  */
-typedef enum LmnStatus_e
-{
-  LMN_STATUS_ERROR = 0, 
-  LMN_STATUS_OK = !LMN_STATUS_ERROR
-} LmnStatus_t;
+#ifndef SUCCESS
+#define SUCCESS                                     1
+#endif
+
+#ifndef FAIL
+#define FAIL                                        0
+#endif
 
 /*!
  * \brief Returns the minimum value between a and b
