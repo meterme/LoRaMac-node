@@ -30,6 +30,7 @@
 #include <hpl_rtc_base.h>
 #include <hpl_gclk_base.h>
 #include <hpl_pm_base.h>
+#include <spi_lite.h>
 
 #include "board-config.h"
 #include "utilities.h"
@@ -95,6 +96,18 @@ SPI_1_PORT_init(void)
 	                       GPIO_PULL_OFF);
 
 	gpio_set_pin_function(EEPROM_MISO, PINMUX_PA14C_SERCOM2_PAD2);
+
+    gpio_set_pin_level(EEPROM_CS,
+	                   // <y> Initial level
+	                   // <id> pad_initial_level
+	                   // <false"> Low
+	                   // <true"> High
+	                   true);
+
+	// Set pin direction to output
+	gpio_set_pin_direction(EEPROM_CS, GPIO_DIRECTION_OUT);
+
+	gpio_set_pin_function(EEPROM_CS, GPIO_PIN_FUNCTION_OFF);
 }
 
 static void
@@ -128,8 +141,6 @@ void BoardInitPeriph( void )
     GpioInit( &LedD13, LED_D13, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
 
 }
-
-extern void initFlash();
 
 void BoardInitMcu( void )
 {
