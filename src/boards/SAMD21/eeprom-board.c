@@ -23,100 +23,65 @@
 #include "utilities.h"
 #include "eeprom-board.h"
 
-#include <peripheral_clk_config.h>
-#include <hpl_gclk_base.h>
-#include <hpl_pm_base.h>
-#include <hal_flash.h>
-#include <string.h>
+#include <hal_gpio.h>
+#include <spi_lite.h>
 
-struct flash_descriptor FLASH_0;
+#define	EEPROM_PAGE_SIZE	4096
+#define	EEPROM_BUFFER_SIZE	128
 
-#define EEPROM_BASE (FLASH_SIZE - 4096UL)
-#define PAGE_SIZE	64
-#define ROW_SIZE	(PAGE_SIZE * 4)
+// XXX: find this a better home
+#define EEPROM_CS                                   GPIO( GPIO_PORTA, 6)
 
-static inline
-uint32_t read_unaligned_uint32(const void *data)
-{
-	union {
-		uint32_t u32;
-		uint8_t u8[4];
-	} res;
-	const uint8_t *d = (const uint8_t *)data;
-	res.u8[0] = d[0];
-	res.u8[1] = d[1];
-	res.u8[2] = d[2];
-	res.u8[3] = d[3];
-	return res.u32;
-}
+static uint8_t eepromPage[EEPROM_PAGE_SIZE];
+static bool eepromPageValid = false;
 
 static void
-write(const volatile void *flash_ptr, const void *data, uint32_t size)
+readEepromPage()
 {
+	uint8_t cmd[4] = { 0x03 };
+	uint32_t addr;
 
-	// Calculate data boundaries
-	size = (size + 3) / 4;
-	volatile uint32_t *dst_addr = (volatile uint32_t *)flash_ptr;
-	const uint8_t *src_addr = (uint8_t *)data;
+	for (addr = 0; addr < EEPROM_PAGE_SIZE; addr += EEPROM_BUFFER_SIZE) {
+		cmd[1] = addr >> 16;
+		cmd[2] = addr >> 8;
+		cmd[3] = addr;
 
-	// Disable automatic page write
-	NVMCTRL->CTRLB.bit.MANW = 1;
-
-	// Do writes in pages
-	while (size) {
-		// Execute "PBC" Page Buffer Clear
-
-		NVMCTRL->CTRLA.reg = NVMCTRL_CTRLA_CMDEX_KEY | NVMCTRL_CTRLA_CMD_PBC;
-		while (NVMCTRL->INTFLAG.bit.READY == 0) { }
-
-		// Fill page buffer
-		uint32_t i;
-		for (i = 0; i < (PAGE_SIZE / 4) && size; i++) {
-			*dst_addr = read_unaligned_uint32(src_addr);
-			src_addr += 4;
-			dst_addr++;
-			size--;
-		}
-
-		// Execute "WP" Write Page
-
-		NVMCTRL->CTRLA.reg = NVMCTRL_CTRLA_CMDEX_KEY | NVMCTRL_CTRLA_CMD_WP;
-		while (NVMCTRL->INTFLAG.bit.READY == 0) { }
+		gpio_set_pin_level(EEPROM_CS, false);
+		SPI_1_exchange_block((void *)cmd, sizeof (cmd));
+		SPI_1_read_block((void *)(eepromPage + addr), EEPROM_BUFFER_SIZE);
+		gpio_set_pin_level(EEPROM_CS, true);
 	}
+
+	eepromPageValid = true;
 }
 
 static void
-erase(const volatile void *flash_ptr, uint32_t size)
+writeEepromPage()
 {
-	const uint8_t *ptr = (const uint8_t *)flash_ptr;
-	while (size > ROW_SIZE) {
 
-		NVMCTRL->ADDR.reg = ((uint32_t)flash_ptr) / 2;
-		NVMCTRL->CTRLA.reg = NVMCTRL_CTRLA_CMDEX_KEY | NVMCTRL_CTRLA_CMD_ER;
-		
-		while (!NVMCTRL->INTFLAG.bit.READY) { }
-		
-		ptr += ROW_SIZE;
-		size -= ROW_SIZE;
-	}
-}
 
-static void
-read(const volatile void *flash_ptr, void *data, uint32_t size)
-{
-	memcpy(data, (const void *)flash_ptr, size);
 }
 
 uint8_t EepromMcuWriteBuffer( uint16_t addr, uint8_t *buffer, uint16_t size )
 {
-    write((const void *)(addr + EEPROM_BASE), buffer, size);
+	if (eepromPageValid) {
+		readEepromPage();
+	}
+
+	memcpy1(eepromPage + addr, buffer, size);
+	writeEepromPage();
+
     return SUCCESS;
 }
 
 uint8_t EepromMcuReadBuffer( uint16_t addr, uint8_t *buffer, uint16_t size )
 {
-    read((const void *)(addr + EEPROM_BASE), buffer, size);
-    return SUCCESS;
+	if (eepromPageValid) {
+		readEepromPage();
+	}
+    
+	memcpy1(buffer, eepromPage + addr, size);
+	return SUCCESS;
 }
 
 void EepromMcuSetDeviceAddr( uint8_t addr )
@@ -131,14 +96,4 @@ uint8_t EepromMcuGetDeviceAddr( void )
     while( 1 )
     {
     }
-//    return 0;
-}
-
-
-
-void
-initFlash()
-{
-	_pm_enable_bus_clock(PM_BUS_APBB, NVMCTRL);
-	flash_init(&FLASH_0, NVMCTRL);
 }

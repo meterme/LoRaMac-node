@@ -29,6 +29,7 @@
 #include <hal_spi_m_sync.h>
 #include <hpl_rtc_base.h>
 #include <hpl_gclk_base.h>
+#include <hpl_pm_base.h>
 
 #include "board-config.h"
 #include "utilities.h"
@@ -52,6 +53,57 @@ Gpio_t LedRx, LedTx, LedD13;
 Uart_t Uart1;
 I2c_t I2c;
 
+// XXX: find this a better home
+
+static void
+SPI_1_PORT_init(void)
+{
+
+	gpio_set_pin_level(EEPROM_MOSI,
+	                   // <y> Initial level
+	                   // <id> pad_initial_level
+	                   // <false"> Low
+	                   // <true"> High
+	                   false);
+
+	// Set pin direction to output
+	gpio_set_pin_direction(EEPROM_MOSI, GPIO_DIRECTION_OUT);
+
+	gpio_set_pin_function(EEPROM_MOSI, PINMUX_PA08D_SERCOM2_PAD0);
+
+	gpio_set_pin_level(EEPROM_SCLK,
+	                   // <y> Initial level
+	                   // <id> pad_initial_level
+	                   // <false"> Low
+	                   // <true"> High
+	                   false);
+
+	// Set pin direction to output
+	gpio_set_pin_direction(EEPROM_SCLK, GPIO_DIRECTION_OUT);
+
+	gpio_set_pin_function(EEPROM_SCLK, PINMUX_PA09D_SERCOM2_PAD1);
+
+	// Set pin direction to input
+	gpio_set_pin_direction(EEPROM_MISO, GPIO_DIRECTION_IN);
+
+	gpio_set_pin_pull_mode(EEPROM_MISO,
+	                       // <y> Pull configuration
+	                       // <id> pad_pull_config
+	                       // <GPIO_PULL_OFF"> Off
+	                       // <GPIO_PULL_UP"> Pull-up
+	                       // <GPIO_PULL_DOWN"> Pull-down
+	                       GPIO_PULL_OFF);
+
+	gpio_set_pin_function(EEPROM_MISO, PINMUX_PA14C_SERCOM2_PAD2);
+}
+
+static void
+SPI_1_CLOCK_init(void)
+{
+	_pm_enable_bus_clock(PM_BUS_APBC, SERCOM2);
+	_gclk_enable_channel(SERCOM2_GCLK_ID_CORE, CONF_GCLK_SERCOM2_CORE_SRC);
+}
+
 /*!
  * Flag to indicate if the MCU is Initialized
  */
@@ -74,6 +126,7 @@ void BoardInitPeriph( void )
     GpioInit( &LedRx, LED_RX, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 1 );
     GpioInit( &LedTx, LED_TX, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 1 );
     GpioInit( &LedD13, LED_D13, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
+
 }
 
 extern void initFlash();
@@ -88,13 +141,16 @@ void BoardInitMcu( void )
 
     RtcInit( );
 
+    // XXX: find this a better home
+	SPI_1_CLOCK_init();
+	SPI_1_init();
+	SPI_1_PORT_init();
+
     /* UART is for GPS input */
     UartInit( &Uart1, UART_1, UART_TX, UART_RX );
  //   UartConfig( &Uart1, RX_TX, 9600, UART_8_BIT, UART_1_STOP_BIT, NO_PARITY, NO_FLOW_CTRL );
-
-    initFlash();
-
-     SpiInit( &SX1276.Spi, SPI_1, RADIO_MOSI, RADIO_MISO, RADIO_SCLK, NC );
+ 
+    SpiInit( &SX1276.Spi, SPI_1, RADIO_MOSI, RADIO_MISO, RADIO_SCLK, NC );
     SX1276IoInit( );
 
 #if 0
