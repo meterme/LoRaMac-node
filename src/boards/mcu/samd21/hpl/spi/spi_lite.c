@@ -134,32 +134,29 @@ void SPI_1_exchange_block(void *block, uint8_t size)
 	}
 }
 
-uint32_t wcount, rcount;
-
 void SPI_1_write_block(void *block, uint8_t size)
 {
-
-	wcount = 0;
+	volatile uint8_t rx;
 	uint8_t *b = (uint8_t *)block;
+
 	while (size--) {
 		hri_sercomspi_write_DATA_reg(SERCOM2, *b);
-		while (!(hri_sercomspi_read_INTFLAG_reg(SERCOM2) & SERCOM_SPI_INTFLAG_RXC)) {
-			++wcount;
-		}
+		while (!(hri_sercomspi_read_INTFLAG_reg(SERCOM2) & SERCOM_SPI_INTFLAG_RXC))
+			;
+		// XXX: dummy read to clear RXC
+		rx = hri_sercomspi_read_DATA_reg(SERCOM2);
 		b++;
 	}
 }
 
 void SPI_1_read_block(void *block, uint8_t size)
 {
-
-	rcount = 0;
 	uint8_t *b = (uint8_t *)block;
+
 	while (size--) {
 		hri_sercomspi_write_DATA_reg(SERCOM2, 0);
-		while (!(hri_sercomspi_read_INTFLAG_reg(SERCOM2) & SERCOM_SPI_INTFLAG_RXC)) {
-			++rcount;
-		}
+		while (!(hri_sercomspi_read_INTFLAG_reg(SERCOM2) & SERCOM_SPI_INTFLAG_RXC))
+			;
 		*b = hri_sercomspi_read_DATA_reg(SERCOM2);
 		b++;
 	}

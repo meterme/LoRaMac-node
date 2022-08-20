@@ -72,6 +72,13 @@ readStatus2(void)
 }
 
 void
+busyWait()
+{
+	while (readStatus1() & 1) {
+	}
+}
+
+void
 enableWrite()
 {
 	selectEeprom();
@@ -85,9 +92,8 @@ eraseChip()
 	selectEeprom();
 	SPI_1_exchange_data(0x60);
 	deselectEeprom();
+	busyWait();
 }
-
-uint32_t count;
 
 static void
 erase4kBlock(uint32_t addr)
@@ -103,10 +109,7 @@ erase4kBlock(uint32_t addr)
 	SPI_1_exchange_block((void *)cmd, sizeof (cmd));
 	deselectEeprom();
 	
-	count = 0;
-	while (readStatus1() & 1) {
-		count++;
-	}
+	busyWait();
 }
 
 static void
@@ -127,21 +130,21 @@ readBlock(uint32_t addr, uint8_t *buffer, size_t len) {
 static void
 writeBlock(uint32_t addr, uint8_t *buffer, size_t len) {
 	uint8_t cmd[4];
+	if ((readStatus1() & 2) == 0) {
+		enableWrite();
+	}
 	
 	cmd[0] = 0x02;
 	cmd[1] = addr >> 16;
 	cmd[2] = addr >> 8;
 	cmd[3] = addr;
-
+	
 	selectEeprom();
 	SPI_1_exchange_block((void *)cmd, sizeof (cmd));
 	SPI_1_write_block((void *)buffer, len);
 	deselectEeprom();
 
-	count = 0;
-	while (readStatus1() & 1) {
-		count++;
-	}
+	busyWait();
 }
 
 static void
