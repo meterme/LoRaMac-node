@@ -73,7 +73,7 @@
  *
  * \remark Please note that LORAWAN_DEFAULT_DATARATE is used only when ADR is disabled 
  */
-#define LORAWAN_DEFAULT_DATARATE                    DR_1
+#define LORAWAN_DEFAULT_DATARATE                    DR_3
 
 /*!
  * LoRaWAN confirmed messages
@@ -251,13 +251,12 @@ extern Uart_t Uart1;
 int main( void )
 {
 
-
     BoardInitMcu( );
     BoardInitPeriph( );
     
     GpioWrite(&LedRx, 1);
     GpioWrite(&LedTx, 1);
-    GpioWrite(&LedD13, 1);
+    GpioWrite(&LedD13, 0);
 
     TimerInit( &Led1Timer, OnLed1TimerEvent );
     TimerSetValue( &Led1Timer, 25 );
@@ -267,6 +266,10 @@ int main( void )
 
     TimerInit( &LedBeaconTimer, OnLedBeaconTimerEvent );
     TimerSetValue( &LedBeaconTimer, 5000 );
+
+    // Initialize transmission periodicity variable
+    TxPeriodicity = APP_TX_DUTYCYCLE + randr( -APP_TX_DUTYCYCLE_RND, APP_TX_DUTYCYCLE_RND );
+    TxPeriodicity = 60000;
 
     const Version_t appVersion = { .Fields.Major = 1, .Fields.Minor = 0, .Fields.Patch = 0 };
     const Version_t gitHubVersion = { .Fields.Major = 4, .Fields.Minor = 4, .Fields.Patch = 7 };
@@ -298,7 +301,7 @@ int main( void )
     {
         // Tick the RTC to execute callback in context of the main loop (in stead of the IRQ)
         TimerProcess( );
-        GpioToggle(&LedD13);
+        // GpioToggle(&LedD13);
 
         // Process characters sent over the command line interface
         CliProcess( &Uart1 );
@@ -387,7 +390,7 @@ static void OnRxData( LmHandlerAppData_t* appData, LmHandlerRxParams_t* params )
     }
 
     // Switch LED 1 ON for each received downlink
-    GpioWrite( &LedD13, 1 );
+    // GpioWrite( &LedD13, 1 );
     TimerStart( &Led2Timer );
 }
 
@@ -456,7 +459,7 @@ static void PrepareTxFrame( void )
     if( LmHandlerSend( &AppData, LORAMAC_HANDLER_UNCONFIRMED_MSG ) == LORAMAC_HANDLER_SUCCESS )
     {
         // Switch LED 1 ON
-        GpioWrite( &LedD13, 0 );
+        GpioWrite( &LedTx, 0 );
         TimerStart( &Led1Timer );
     }
 }
@@ -516,7 +519,7 @@ static void OnLed1TimerEvent( void* context )
 {
     TimerStop( &Led1Timer );
     // Switch LED 1 OFF
-    GpioWrite( &LedD13, 0 );
+    GpioWrite( &LedTx, 1 );
 }
 
 /*!
@@ -524,9 +527,9 @@ static void OnLed1TimerEvent( void* context )
  */
 static void OnLed2TimerEvent( void* context )
 {
-    TimerStop( &Led1Timer );
+    TimerStop( &Led2Timer );
     // Switch LED 1 OFF
-    GpioWrite( &LedD13, 0 );
+    // GpioWrite( &LedD13, 0 );
 }
 
 /*!
@@ -534,7 +537,7 @@ static void OnLed2TimerEvent( void* context )
  */
 static void OnLedBeaconTimerEvent( void* context )
 {
-    GpioWrite( &LedD13, 1 );
+    // GpioWrite( &LedD13, 1 );
     TimerStart( &Led2Timer );
 
     TimerStart( &LedBeaconTimer );
