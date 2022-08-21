@@ -233,12 +233,16 @@ void SX1276Reset( void )
 }
 
 // XXX: add support for +10dB PA
+extern Gpio_t LedRx;
 
 void
 SX1276SetRfTxPower( int8_t power )
 {
     uint8_t paConfig = 0;
     uint8_t paDac = 0;
+
+    // XXX: indicate power level with LED_RX, on > 20dBm
+    GpioWrite(&LedRx, (power > 20));
 
     power -= 10;
     

@@ -26,7 +26,7 @@
 #include <string.h>
 #include <math.h>
 
-extern Gpio_t LedRx;
+extern Gpio_t LedD13;
 
 #define GPS_MAX_FIELDS  30
 
@@ -105,7 +105,7 @@ processGpsSentence(uint8_t check)
 
     altitude = strtof(gpsField[9], NULL);
 
-    GpioToggle(&LedRx);
+    GpioToggle(&LedD13);
 
     *((uint32_t *)(coords + 0)) = htonl( (uint32_t)(lat * 1000000UL));
     *((uint32_t *)(coords + 4)) = htonl( (uint32_t)(lon * 1000000UL));
