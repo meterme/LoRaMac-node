@@ -94,6 +94,9 @@ function(generate_vscode_launch_openocd TARGET)
     elseif(BOARD STREQUAL SAMR34)
         set(OPENOCD_INTERFACE cmsis-dap.cfg)
         set(OPENOCD_TARGET at91samdXX.cfg)
+    elseif(BOARD STREQUAL SAMD21)
+        set(OPENOCD_INTERFACE cmsis-dap.cfg)
+        set(OPENOCD_TARGET at91samdXX.cfg)
     endif()
 
 

@@ -23,8 +23,8 @@ cmake_minimum_required(VERSION 3.6)
 #---------------------------------------------------------------------------------------
 
 # Allow switching of target platform
-set(BOARD_LIST NAMote72 NucleoL073 NucleoL152 NucleoL476 SAMR34 SKiM880B SKiM980A SKiM881AXL B-L072Z-LRWAN1)
-set(BOARD NucleoL073 CACHE STRING "Default target platform is NucleoL073")
+set(BOARD_LIST NAMote72 NucleoL073 NucleoL152 NucleoL476 SAMR34 SAMD21 SKiM880B SKiM980A SKiM881AXL B-L072Z-LRWAN1)
+set(BOARD SAMD21 CACHE STRING "Default target platform is SparkX ProRF 1W SAMD21")
 set_property(CACHE BOARD PROPERTY STRINGS ${BOARD_LIST})
 
 # Allow switching of MBED shields
@@ -136,6 +136,22 @@ elseif(BOARD STREQUAL SAMR34)
 
     # Build platform specific board implementation
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/boards/SAMR34)
+
+    # Configure radio
+    set(RADIO sx1276 CACHE INTERNAL "Radio sx1276 selected")
+
+elseif(BOARD STREQUAL SAMD21)
+
+    # Configure toolchain for SAMD21
+    set(LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/boards/mcu/samd21/samd21a/gcc/gcc/samd21g18a_flash.ld)
+    include(samd21)
+
+    set(OPENOCD_BIN "C:/Users/danam/Downloads/openocd-20211118/OpenOCD-20211118-0.11.0/bin/openocd.exe")
+    set(OPENOCD_INTERFACE "cmsis-dap.cfg")
+    set(OPENOCD_TARGET "at91samdXX.cfg")
+
+    # Build platform specific board implementation
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/boards/SAMD21)
 
     # Configure radio
     set(RADIO sx1276 CACHE INTERNAL "Radio sx1276 selected")
