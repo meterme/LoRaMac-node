@@ -55,8 +55,10 @@ static RadioOperatingModes_t OperatingMode;
 /*!
  * Antenna switch GPIO pins objects
  */
-Gpio_t AntPow;
-Gpio_t DeviceSel;
+// Gpio_t AntPow;
+// Gpio_t DeviceSel;
+Gpio_t RxEN;
+Gpio_t TxEN;
 
 /*!
  * Debug GPIO pins objects
@@ -71,7 +73,10 @@ void SX126xIoInit( void )
     GpioInit( &SX126x.Spi.Nss, RADIO_NSS, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 1 );
     GpioInit( &SX126x.BUSY, RADIO_BUSY, PIN_INPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
     GpioInit( &SX126x.DIO1, RADIO_DIO_1, PIN_INPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
-    GpioInit( &DeviceSel, RADIO_DEVICE_SEL, PIN_INPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
+//     GpioInit( &DeviceSel, RADIO_DEVICE_SEL, PIN_INPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
+
+    GpioInit( &RxEN, RADIO_RXEN, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
+    GpioInit( &TxEN, RADIO_TXEN, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
 }
 
 void SX126xIoIrqInit( DioIrqHandler dioIrq )
@@ -98,7 +103,7 @@ void SX126xIoTcxoInit( void )
 {
     CalibrationParams_t calibParam;
 
-    SX126xSetDio3AsTcxoCtrl( TCXO_CTRL_1_7V, SX126xGetBoardTcxoWakeupTime( ) << 6 ); // convert from ms to SX126x time base
+    SX126xSetDio3AsTcxoCtrl( TCXO_CTRL_1_8V, SX126xGetBoardTcxoWakeupTime( ) << 6 ); // convert from ms to SX126x time base
     calibParam.Value = 0x7F;
     SX126xCalibrate( calibParam );
 }
@@ -121,6 +126,25 @@ RadioOperatingModes_t SX126xGetOperatingMode( void )
 void SX126xSetOperatingMode( RadioOperatingModes_t mode )
 {
     OperatingMode = mode;
+
+    switch (mode) {
+    case MODE_RX:
+    case MODE_RX_DC:
+        GpioWrite(&TxEN, 0);
+        GpioWrite(&RxEN, 1);
+        break;
+
+    case MODE_TX:
+        GpioWrite(&TxEN, 1);
+        GpioWrite(&RxEN, 0);
+        break;
+        
+    default:
+        GpioWrite(&TxEN, 0);
+        GpioWrite(&RxEN, 0);        
+        break;
+    }
+
 #if defined( USE_RADIO_DEBUG )
     switch( mode )
     {
@@ -311,6 +335,8 @@ void SX126xSetRfTxPower( int8_t power )
 
 uint8_t SX126xGetDeviceId( void )
 {
+    // XXX: E22-900M30S
+#if 0
     if( GpioRead( &DeviceSel ) == 1 )
     {
         return SX1261;
@@ -319,16 +345,19 @@ uint8_t SX126xGetDeviceId( void )
     {
         return SX1262;
     }
+#else
+    return (SX1262);
+#endif
 }
 
 void SX126xAntSwOn( void )
 {
-    GpioInit( &AntPow, RADIO_ANT_SWITCH_POWER, PIN_OUTPUT, PIN_PUSH_PULL, PIN_PULL_UP, 1 );
+//    GpioInit( &AntPow, RADIO_ANT_SWITCH_POWER, PIN_OUTPUT, PIN_PUSH_PULL, PIN_PULL_UP, 1 );
 }
 
 void SX126xAntSwOff( void )
 {
-    GpioInit( &AntPow, RADIO_ANT_SWITCH_POWER, PIN_ANALOGIC, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
+//    GpioInit( &AntPow, RADIO_ANT_SWITCH_POWER, PIN_ANALOGIC, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
 }
 
 bool SX126xCheckRfFrequency( uint32_t frequency )

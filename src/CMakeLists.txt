@@ -92,6 +92,8 @@ elseif(BOARD STREQUAL NucleoL152)
     set(LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/boards/NucleoL152/cmsis/arm-gcc/stm32l152xe_flash.ld)
     include(stm32l1)
 
+    set(OPENOCD_BIN "C:/Users/danam/Downloads/openocd-20211118/OpenOCD-20211118-0.11.0/bin/openocd.exe")
+
     # Build platform specific board implementation
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/boards/NucleoL152)
 

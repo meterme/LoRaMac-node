@@ -50,7 +50,7 @@
 /*!
  * Defines the application data transmission duty cycle. 5s, value in [ms].
  */
-#define APP_TX_DUTYCYCLE                            5000
+#define APP_TX_DUTYCYCLE                            30000
 
 /*!
  * Defines a random delay for application data transmission duty cycle. 1s,
@@ -232,8 +232,8 @@ static volatile uint8_t IsTxFramePending = 0;
 /*!
  * LED GPIO pins objects
  */
-extern Gpio_t Led1; // Tx
-extern Gpio_t Led2; // Rx
+// extern Gpio_t Led1; // Tx
+// extern Gpio_t Led2; // Rx
 
 /*!
  * UART object used for command line interface handling
@@ -369,7 +369,7 @@ static void OnRxData( LmHandlerAppData_t* appData, LmHandlerRxParams_t* params )
     }
 
     // Switch LED 2 ON for each received downlink
-    GpioWrite( &Led2, 1 );
+//    GpioWrite( &Led2, 1 );
     TimerStart( &Led2Timer );
 }
 
@@ -447,7 +447,7 @@ static void PrepareTxFrame( void )
     if( LmHandlerSend( &AppData, LORAWAN_DEFAULT_CONFIRMED_MSG_STATE ) == LORAMAC_HANDLER_SUCCESS )
     {
         // Switch LED 1 ON
-        GpioWrite( &Led1, 1 );
+//        GpioWrite( &Led1, 1 );
         TimerStart( &Led1Timer );
     }
 }
@@ -507,7 +507,7 @@ static void OnLed1TimerEvent( void* context )
 {
     TimerStop( &Led1Timer );
     // Switch LED 1 OFF
-    GpioWrite( &Led1, 0 );
+//    GpioWrite( &Led1, 0 );
 }
 
 /*!
@@ -517,7 +517,7 @@ static void OnLed2TimerEvent( void* context )
 {
     TimerStop( &Led2Timer );
     // Switch LED 2 OFF
-    GpioWrite( &Led2, 0 );
+//    GpioWrite( &Led2, 0 );
 }
 
 /*!
@@ -525,7 +525,7 @@ static void OnLed2TimerEvent( void* context )
  */
 static void OnLedBeaconTimerEvent( void* context )
 {
-    GpioWrite( &Led2, 1 );
+//    GpioWrite( &Led2, 1 );
     TimerStart( &Led2Timer );
 
     TimerStart( &LedBeaconTimer );
