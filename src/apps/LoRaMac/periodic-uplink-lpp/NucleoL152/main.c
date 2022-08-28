@@ -437,6 +437,11 @@ static void PrepareTxFrame( void )
         return;
     }
     
+    // no valid report ready
+    if ( *((uint32_t *) &coords) == 0xffffffff ) {
+        return;
+    }
+
     AppData.Port = LORAWAN_APP_PORT;
 
     if( LmHandlerSend( &AppData, LORAWAN_DEFAULT_CONFIRMED_MSG_STATE ) == LORAMAC_HANDLER_SUCCESS )

@@ -18,14 +18,6 @@ static uint8_t gpsIndex;
 static char *gpsField[GPS_MAX_FIELDS];
 static char *gpsPtr = gpsBuffer;
 
-#define htonl(x) ( ((x)<<24 & 0xFF000000UL) | \
-                   ((x)<< 8 & 0x00FF0000UL) | \
-                   ((x)>> 8 & 0x0000FF00UL) | \
-                   ((x)>>24 & 0x000000FFUL) )
-
-#define htons(x) ( ((x)<< 8 & 0x0000FF00UL) | \
-                   ((x)>> 8 & 0x000000FFUL) )
-
 uint8_t coords[18] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 
 static float
@@ -47,6 +39,7 @@ processGpsSentence(uint8_t check)
     uint8_t checkVal;
     volatile float lat, lon, hdop, altitude;
 
+    memset(coords, 0xff, sizeof(coords));
     checkVal = strtol(gpsField[gpsIndex], NULL, 16);
     if (checkVal != check || gpsIndex < 2) {
         // invalid sentence, return
@@ -63,9 +56,6 @@ processGpsSentence(uint8_t check)
     if (gpsIndex < 15) {
         return;
     }
-
-    *((uint32_t *)(coords + 0)) = 0xffffffff;
-    *((uint32_t *)(coords + 4)) = 0xffffffff;
 
     if (atoi(gpsField[6]) < 1) {
         // no fix
@@ -86,19 +76,19 @@ processGpsSentence(uint8_t check)
 
     altitude = strtof(gpsField[9], NULL);
 
-    /* XXX: set flag indicating updated coords packet */
-    
-    *((uint32_t *)(coords + 0)) = htonl( (uint32_t)(lat * 1000000UL));
-    *((uint32_t *)(coords + 4)) = htonl( (uint32_t)(lon * 1000000UL));
+    *((int32_t *)(coords + 0)) = __bswap32( (int32_t)(lat * 1000000L) );
+    *((int32_t *)(coords + 4)) = __bswap32( (int32_t)(lon * 1000000L) );
 
     altitude = roundf(altitude);
   
-    *((uint16_t *)(coords + 8)) = htons(4000); // mV
+    *((uint16_t *)(coords + 8)) = __bswap16(4000); // mV
     coords[10] = 0x04; // FLAG, LED off, no movement mode, version 1.6.4
-    *((uint16_t *)(coords + 11)) = htons(0); // roll
-    *((uint16_t *)(coords + 13)) = htons(0); // pitch
+    *((uint16_t *)(coords + 11)) = __bswap16(0); // roll
+    *((uint16_t *)(coords + 13)) = __bswap16(0); // pitch
     coords[15] = (int8_t)(hdop * 100.0);
-    *((uint16_t *)(coords + 16)) = htons((int16_t)(altitude * 100.0)); // altitude
+    *((uint16_t *)(coords + 16)) = __bswap16((int16_t)(altitude * 100.0)); // altitude
+
+    // XXX: indicate coords ready ?
 }
 
 static void
@@ -170,9 +160,9 @@ processGpsChar(uint8_t c)
 void
 ProcessGps( Uart_t* uart )
 {
-    uint8_t data = 0;
+    uint8_t data;
     
     if( UartGetChar( uart, &data ) == 0 ) {
-        processGpsChar(data);
+        processGpsChar( data );
     }
 }
