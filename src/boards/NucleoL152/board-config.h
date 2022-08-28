@@ -125,8 +125,11 @@ extern "C"
 #define I2C_SCL                                     PB_8
 #define I2C_SDA                                     PB_9
 
-#define UART_TX                                     PA_2
-#define UART_RX                                     PA_3
+#define UART2_TX                                     PA_2
+#define UART2_RX                                     PA_3
+
+#define UART1_TX                                     PA_9
+#define UART1_RX                                     PA_10
 
 #ifdef __cplusplus
 }

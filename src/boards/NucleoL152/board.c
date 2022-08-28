@@ -60,6 +60,7 @@
 /*
  * MCU objects
  */
+Uart_t Uart1;
 Uart_t Uart2;
 
 #if defined( LR1110MB1XXS )
@@ -107,8 +108,14 @@ static bool UsbIsConnected = false;
 #define UART2_FIFO_TX_SIZE                                1024
 #define UART2_FIFO_RX_SIZE                                1024
 
+#define UART1_FIFO_TX_SIZE                                1024
+#define UART1_FIFO_RX_SIZE                                1024
+
 uint8_t Uart2TxBuffer[UART2_FIFO_TX_SIZE];
 uint8_t Uart2RxBuffer[UART2_FIFO_RX_SIZE];
+
+uint8_t Uart1TxBuffer[UART1_FIFO_TX_SIZE];
+uint8_t Uart1RxBuffer[UART1_FIFO_RX_SIZE];
 
 /*!
  * Flag to indicate if the SystemWakeupTime is Calibrated
@@ -157,8 +164,14 @@ void BoardInitMcu( void )
         FifoInit( &Uart2.FifoTx, Uart2TxBuffer, UART2_FIFO_TX_SIZE );
         FifoInit( &Uart2.FifoRx, Uart2RxBuffer, UART2_FIFO_RX_SIZE );
         // Configure your terminal for 8 Bits data (7 data bit + 1 parity bit), no parity and no flow ctrl
-        UartInit( &Uart2, UART_2, UART_TX, UART_RX );
+        UartInit( &Uart2, UART_2, UART2_TX, UART2_RX );
         UartConfig( &Uart2, RX_TX, 921600, UART_8_BIT, UART_1_STOP_BIT, NO_PARITY, NO_FLOW_CTRL );
+
+        FifoInit( &Uart1.FifoTx, Uart1TxBuffer, UART1_FIFO_TX_SIZE );
+        FifoInit( &Uart1.FifoRx, Uart1RxBuffer, UART1_FIFO_RX_SIZE );
+        // Configure your terminal for 8 Bits data (7 data bit + 1 parity bit), no parity and no flow ctrl
+        UartInit( &Uart1, UART_1, UART1_TX, UART1_RX );
+        UartConfig( &Uart1, RX_TX, 921600, UART_8_BIT, UART_1_STOP_BIT, NO_PARITY, NO_FLOW_CTRL );
 
         RtcInit( );
 

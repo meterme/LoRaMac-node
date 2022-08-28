@@ -518,7 +518,7 @@ void SX126xSetTxParams( int8_t power, RadioRampTimes_t rampTime )
 {
     uint8_t buf[2];
 
-    // Adjuist for the E22-900M30S PA gain
+    // XXX: ??? Adjust for the E22-900M30S PA gain
     power -= 8;
 
     if( SX126xGetDeviceId( ) == SX1261 )
