@@ -27,6 +27,7 @@
 #include "gpio.h"
 #include "uart.h"
 
+#include "gps.h"
 #include "cli.h"
 #include "Commissioning.h"
 #include "LmHandler.h"
@@ -287,6 +288,9 @@ int main( void )
     {
         // Process characters sent over the command line interface
         CliProcess( &Uart2 );
+
+        // Process GPS receiver
+        ProcessGps(Uart1);
 
         // Processes the LoRaMac events
         LmHandlerProcess( );

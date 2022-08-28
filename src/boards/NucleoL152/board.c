@@ -171,7 +171,7 @@ void BoardInitMcu( void )
         FifoInit( &Uart1.FifoRx, Uart1RxBuffer, UART1_FIFO_RX_SIZE );
         // Configure your terminal for 8 Bits data (7 data bit + 1 parity bit), no parity and no flow ctrl
         UartInit( &Uart1, UART_1, UART1_TX, UART1_RX );
-        UartConfig( &Uart1, RX_TX, 921600, UART_8_BIT, UART_1_STOP_BIT, NO_PARITY, NO_FLOW_CTRL );
+        UartConfig( &Uart1, RX_TX, 9600, UART_8_BIT, UART_1_STOP_BIT, NO_PARITY, NO_FLOW_CTRL );
 
         RtcInit( );
 
