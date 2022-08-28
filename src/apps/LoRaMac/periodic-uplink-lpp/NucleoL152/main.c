@@ -37,7 +37,7 @@
 
 #ifndef ACTIVE_REGION
 
-#warning "No active region defined, LORAMAC_REGION_EU868 will be used as default."
+#warning "No active region defined, LORAMAC_REGION_US915 will be used as default."
 
 #define ACTIVE_REGION LORAMAC_REGION_EU868
 
@@ -51,7 +51,7 @@
 /*!
  * Defines the application data transmission duty cycle. 5s, value in [ms].
  */
-#define APP_TX_DUTYCYCLE                            300000
+#define APP_TX_DUTYCYCLE                            60000
 
 /*!
  * Defines a random delay for application data transmission duty cycle. 1s,
@@ -71,7 +71,7 @@
  *
  * \remark Please note that LORAWAN_DEFAULT_DATARATE is used only when ADR is disabled 
  */
-#define LORAWAN_DEFAULT_DATARATE                    DR_1
+#define LORAWAN_DEFAULT_DATARATE                    DR_2
 
 /*!
  * LoRaWAN confirmed messages
@@ -115,9 +115,9 @@ static uint8_t AppDataBuffer[LORAWAN_APP_DATA_BUFFER_MAX_SIZE];
  */
 static LmHandlerAppData_t AppData =
 {
-    .Buffer = AppDataBuffer,
-    .BufferSize = 0,
-    .Port = 0
+    .Buffer = coords,
+    .BufferSize = 18,
+    .Port = 0,
 };
 
 /*!
@@ -290,7 +290,7 @@ int main( void )
         CliProcess( &Uart2 );
 
         // Process GPS receiver
-        ProcessGps(Uart1);
+        ProcessGps( &Uart1 );
 
         // Processes the LoRaMac events
         LmHandlerProcess( );
@@ -436,23 +436,14 @@ static void PrepareTxFrame( void )
     {
         return;
     }
-
-    uint8_t channel = 0;
-
+    
     AppData.Port = LORAWAN_APP_PORT;
-
-    CayenneLppReset( );
-    CayenneLppAddDigitalInput( channel++, AppLedStateOn );
-    CayenneLppAddAnalogInput( channel++, BoardGetBatteryLevel( ) * 100 / 254 );
-
-    CayenneLppCopy( AppData.Buffer );
-    AppData.BufferSize = CayenneLppGetSize( );
 
     if( LmHandlerSend( &AppData, LORAWAN_DEFAULT_CONFIRMED_MSG_STATE ) == LORAMAC_HANDLER_SUCCESS )
     {
         // Switch LED 1 ON
 //        GpioWrite( &Led1, 1 );
-        TimerStart( &Led1Timer );
+//        TimerStart( &Led1Timer );
     }
 }
 

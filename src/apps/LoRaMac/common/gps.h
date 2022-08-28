@@ -15,7 +15,8 @@
 
 /* process GPS characters */
 
-void GpsProcess( Uart_t* uart );
+void ProcessGps( Uart_t* uart );
+extern uint8_t coords[];
 
 #ifdef __cplusplus
 }
