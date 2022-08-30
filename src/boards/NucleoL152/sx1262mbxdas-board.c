@@ -330,8 +330,20 @@ void SX126xReadBuffer( uint8_t offset, uint8_t *buffer, uint8_t size )
 
 void SX126xSetRfTxPower( int8_t power )
 {
-    // XXX: reduce power by 8dB for E22-900 module
-    SX126xSetTxParams( power - 8, RADIO_RAMP_40_US );
+    // XXX: simple adjustment for E22-M900M30S PA gain
+    if (power > 28) {
+        power -= 14;
+    } else if (power > 25) {
+        power -= 16;
+    } else if (power > 15) {
+        power -= 17;
+    } else if (power > 10) {
+        power -= 8;
+    } else {
+        power -= 6;
+    }
+
+    SX126xSetTxParams( power, RADIO_RAMP_40_US );
 }
 
 uint8_t SX126xGetDeviceId( void )
