@@ -518,7 +518,6 @@ void SX126xSetTxParams( int8_t power, RadioRampTimes_t rampTime )
 {
     uint8_t buf[2];
 
-    // XXX: adjust for PA gain?
     if( SX126xGetDeviceId( ) == SX1261 )
     {
         if( power == 15 )

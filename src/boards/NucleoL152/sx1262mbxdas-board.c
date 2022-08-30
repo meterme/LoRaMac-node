@@ -330,7 +330,8 @@ void SX126xReadBuffer( uint8_t offset, uint8_t *buffer, uint8_t size )
 
 void SX126xSetRfTxPower( int8_t power )
 {
-    SX126xSetTxParams( power, RADIO_RAMP_40_US );
+    // XXX: reduce power by 8dB for E22-900 module
+    SX126xSetTxParams( power - 8, RADIO_RAMP_40_US );
 }
 
 uint8_t SX126xGetDeviceId( void )

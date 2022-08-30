@@ -88,7 +88,7 @@
  *
  * \remark Please note that ETSI mandates duty cycled transmissions. Use only for test purposes
  */
-#define LORAWAN_DUTYCYCLE_ON                        true
+#define LORAWAN_DUTYCYCLE_ON                        false
 
 /*!
  * LoRaWAN application port
@@ -306,8 +306,11 @@ int main( void )
         }
         else
         {
-            // The MCU wakes up through events
-            BoardLowPowerHandler( );
+            // XXX: Don't sleep if operating as a tracker
+            if (0) {
+                // The MCU wakes up through events
+                BoardLowPowerHandler( );
+            }
         }
         CRITICAL_SECTION_END( );
     }

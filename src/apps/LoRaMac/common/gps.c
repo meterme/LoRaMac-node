@@ -39,7 +39,6 @@ processGpsSentence(uint8_t check)
     uint8_t checkVal;
     volatile float lat, lon, hdop, altitude;
 
-    memset(coords, 0xff, sizeof(coords));
     checkVal = strtol(gpsField[gpsIndex], NULL, 16);
     if (checkVal != check || gpsIndex < 2) {
         // invalid sentence, return
@@ -50,6 +49,8 @@ processGpsSentence(uint8_t check)
         // not the sentence we want
         return;
     }
+
+    memset(coords, 0xff, sizeof(coords));
 
     // GGA has 16 total fields
     // 2, 3: lat, 4, 5: long, 6: fix, 8: hdop, 9, 10: altitude

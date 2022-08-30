@@ -108,8 +108,8 @@ static bool UsbIsConnected = false;
 #define UART2_FIFO_TX_SIZE                                1024
 #define UART2_FIFO_RX_SIZE                                1024
 
-#define UART1_FIFO_TX_SIZE                                128
-#define UART1_FIFO_RX_SIZE                                128
+#define UART1_FIFO_TX_SIZE                                1024
+#define UART1_FIFO_RX_SIZE                                1024
 
 uint8_t Uart2TxBuffer[UART2_FIFO_TX_SIZE];
 uint8_t Uart2RxBuffer[UART2_FIFO_RX_SIZE];
