@@ -24,7 +24,7 @@
 
         // Determines the application. You can choose between:
         // LoRaMac (Default), ping-pong, rx-sensi, tx-cw.
-        "APPLICATION":"LoRaMac",
+        "APPLICATION":"tx-cw",
 
         // Select LoRaMac sub project. You can choose between:
         // periodic-uplink-lpp, fuota-test-01.
@@ -66,7 +66,7 @@
 
         // Region support activation, Select the ones you want to support.
         // By default only REGION_EU868 support is enabled.
-        "REGION_EU868":"ON",
+        "REGION_EU868":"OFF",
         "REGION_US915":"ON",
         "REGION_CN779":"OFF",
         "REGION_EU433":"OFF",
@@ -88,6 +88,8 @@
     },
     "files.associations": {
         "se-identity.h": "c",
-        "commissioning.h": "c"
+        "commissioning.h": "c",
+        "board.h": "c",
+        "hpl_adc_config.h": "c"
     }
 }

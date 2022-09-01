@@ -31,6 +31,7 @@
 #include <hpl_gclk_base.h>
 #include <hpl_pm_base.h>
 #include <spi_lite.h>
+#include <hal_adc_sync.h>
 
 #include "board-config.h"
 #include "utilities.h"
@@ -110,11 +111,57 @@ SPI_1_PORT_init(void)
 	gpio_set_pin_function(EEPROM_CS, GPIO_PIN_FUNCTION_OFF);
 }
 
+//
+//
+//
+
+struct adc_sync_descriptor ADC_0;
+
+void ADC_0_PORT_init(void)
+{
+
+	// Disable digital pin circuitry
+	gpio_set_pin_direction(ADC_IN1, GPIO_DIRECTION_OFF);
+
+	gpio_set_pin_function(ADC_IN1, PINMUX_PA02B_ADC_AIN0);
+
+	// Disable digital pin circuitry
+	gpio_set_pin_direction(ADC_IN2, GPIO_DIRECTION_OFF);
+
+	gpio_set_pin_function(ADC_IN2, PINMUX_PA03B_ADC_AIN1);
+}
+
+void ADC_0_CLOCK_init(void)
+{
+	_pm_enable_bus_clock(PM_BUS_APBC, ADC);
+	_gclk_enable_channel(ADC_GCLK_ID, CONF_GCLK_ADC_SRC);
+}
+
+void ADC_0_init(void)
+{
+	ADC_0_CLOCK_init();
+	ADC_0_PORT_init();
+	adc_sync_init(&ADC_0, ADC, (void *)NULL);
+}
+
+
 static void
 SPI_1_CLOCK_init(void)
 {
 	_pm_enable_bus_clock(PM_BUS_APBC, SERCOM2);
 	_gclk_enable_channel(SERCOM2_GCLK_ID_CORE, CONF_GCLK_SERCOM2_CORE_SRC);
+}
+
+uint16_t
+readAdc()
+{
+    int32_t st;
+    uint16_t buff[4] = { 0 };
+    
+    st = adc_sync_enable_channel(&ADC_0, 0);
+    st = adc_sync_read_channel(&ADC_0, 0, (uint8_t *) &buff, sizeof (buff) );
+
+    return (buff[0]);
 }
 
 /*!
@@ -157,12 +204,19 @@ void BoardInitMcu( void )
 	SPI_1_init();
 	SPI_1_PORT_init();
 
+    // init ADC
+    ADC_0_CLOCK_init();
+    ADC_0_PORT_init();
+   	adc_sync_init(&ADC_0, ADC, (void *)NULL);
+
     /* UART is for GPS input */
     UartInit( &Uart1, UART_1, UART_TX, UART_RX );
  //   UartConfig( &Uart1, RX_TX, 9600, UART_8_BIT, UART_1_STOP_BIT, NO_PARITY, NO_FLOW_CTRL );
  
     SpiInit( &SX1276.Spi, SPI_1, RADIO_MOSI, RADIO_MISO, RADIO_SCLK, NC );
     SX1276IoInit( );
+
+    volatile uint16_t x = readAdc();
 
 #if 0
     // XXX:

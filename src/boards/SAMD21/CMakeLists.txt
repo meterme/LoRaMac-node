@@ -38,6 +38,7 @@ list(APPEND ${PROJECT_NAME}_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hw_timer.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/samd21a/gcc/gcc/startup_samd21.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/samd21a/gcc/system_samd21.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hal/src/hal_adc_sync.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hal/src/hal_atomic.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hal/src/hal_delay.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hal/src/hal_ext_irq.c"
@@ -54,6 +55,7 @@ list(APPEND ${PROJECT_NAME}_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hal/utils/src/utils_syscalls.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hpl/core/hpl_core_m0plus_base.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hpl/core/hpl_init.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hpl/adc/hpl_adc.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hpl/dmac/hpl_dmac.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hpl/eic/hpl_eic.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hpl/gclk/hpl_gclk.c"
@@ -87,6 +89,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hal/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hal/utils/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hpl/core
+    ${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hpl/dmac
     ${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hpl/dmac
     ${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hpl/eic
     ${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hpl/gclk
