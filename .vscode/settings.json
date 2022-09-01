@@ -90,6 +90,8 @@
         "se-identity.h": "c",
         "commissioning.h": "c",
         "board.h": "c",
-        "hpl_adc_config.h": "c"
+        "hpl_adc_config.h": "c",
+        "cmath": "c",
+        "limits": "c"
     }
 }

@@ -121,14 +121,14 @@ void ADC_0_PORT_init(void)
 {
 
 	// Disable digital pin circuitry
-	gpio_set_pin_direction(ADC_IN1, GPIO_DIRECTION_OFF);
+	gpio_set_pin_direction(ADC_IN0, GPIO_DIRECTION_OFF);
 
-	gpio_set_pin_function(ADC_IN1, PINMUX_PA02B_ADC_AIN0);
+	gpio_set_pin_function(ADC_IN0, PINMUX_PA02B_ADC_AIN0);
 
 	// Disable digital pin circuitry
-	gpio_set_pin_direction(ADC_IN2, GPIO_DIRECTION_OFF);
+	gpio_set_pin_direction(ADC_IN1, GPIO_DIRECTION_OFF);
 
-	gpio_set_pin_function(ADC_IN2, PINMUX_PA03B_ADC_AIN1);
+	gpio_set_pin_function(ADC_IN1, PINMUX_PA03B_ADC_AIN1);
 }
 
 void ADC_0_CLOCK_init(void)
@@ -141,6 +141,10 @@ void ADC_0_init(void)
 {
 	ADC_0_CLOCK_init();
 	ADC_0_PORT_init();
+
+    // make sure reference is enabkled
+	SYSCTRL->VREF.reg |= SYSCTRL_VREF_BGOUTEN;
+
 	adc_sync_init(&ADC_0, ADC, (void *)NULL);
 }
 
@@ -156,12 +160,12 @@ uint16_t
 readAdc()
 {
     int32_t st;
-    uint16_t buff[4] = { 0 };
+    uint16_t aVal;
     
     st = adc_sync_enable_channel(&ADC_0, 0);
-    st = adc_sync_read_channel(&ADC_0, 0, (uint8_t *) &buff, sizeof (buff) );
+    st = adc_sync_read_channel(&ADC_0, 0, (uint8_t *) &aVal, sizeof (aVal) );
 
-    return (buff[0]);
+    return (aVal);
 }
 
 /*!
@@ -216,7 +220,10 @@ void BoardInitMcu( void )
     SpiInit( &SX1276.Spi, SPI_1, RADIO_MOSI, RADIO_MISO, RADIO_SCLK, NC );
     SX1276IoInit( );
 
-    volatile uint16_t x = readAdc();
+    Delay(0.1f);
+    readAdc();
+
+    volatile uint32_t x = readAdc();
 
 #if 0
     // XXX:

@@ -29,6 +29,8 @@
 
 #include "delay.h"
 
+#include <math.h>
+
 extern uint16_t readAdc(void);
 
 
@@ -89,8 +91,14 @@ extern uint16_t readAdc(void);
 #endif
 #define TX_TIMEOUT                                  1     // seconds (MAX value)
 
-static int8_t txPower;
-volatile int16_t txVal;
+int8_t txPower;
+int16_t txVal;
+int16_t aVal;
+float floorPower;
+float fVal[22];
+float pVal[22];
+
+volatile bool txDone = false;
 
 /*!
  * Radio events function pointer
@@ -104,9 +112,27 @@ void OnRadioTxTimeout( void )
 {
     // Restarts continuous wave transmission when timeout expires
 
+    txDone = true;
+#if 0
     Delay(2.0);
     Radio.SetTxContinuousWave( RF_FREQUENCY, txPower, TX_TIMEOUT );
+    Delay(0.1);
+    aVal = readAdc();
+    fVal = (aVal / 32768.0f);
+#endif
 }
+
+float
+convertdBm(float mVal)
+{
+    float adjV, p, dBm;
+
+    adjV = mVal / 1.9f;
+    p = (adjV * adjV) / 50.0f;
+    dBm = 10.0f * log10f(p * 1000.0f);
+    return (dBm + 29.5f);
+}
+
 
 /**
  * Main application entry point.
@@ -117,18 +143,33 @@ int main( void )
     BoardInitMcu( );
     BoardInitPeriph( );
 
+    // get 'floor' base power reading
+    aVal = readAdc();
+    floorPower = convertdBm(aVal / 32768.0f);
+
     // Radio initialization
     RadioEvents.TxTimeout = OnRadioTxTimeout;
     Radio.Init( &RadioEvents );
 
-    txPower = 20;
-    Radio.SetTxContinuousWave( RF_FREQUENCY, txPower, TX_TIMEOUT );
+    for (txPower = 0; txPower < 22; txPower++) {
+        txDone = false;
+        Radio.SetTxContinuousWave( RF_FREQUENCY, txPower, TX_TIMEOUT );
+        Delay(0.1);
+        aVal = readAdc();
+        fVal[txPower] = (aVal / 32768.0f);
+        pVal[txPower] = convertdBm(fVal[txPower]);
+
+        while (!txDone) {
+            // wait
+        }
+        Delay(1.0);
+    }
+    // Radio.SetTxContinuousWave( RF_FREQUENCY, txPower, TX_TIMEOUT );
 
     // Blink LEDs just to show some activity
     while( 1 )
     {
         // Tick the RTC to execute callback in context of the main loop (in stead of the IRQ)
         TimerProcess( );
-
     }
 }

@@ -108,7 +108,7 @@
 // <i> These bits define the Mux selection for the negative ADC input. (MUXNEG)
 // <id> adc_pinmux_negative
 #ifndef CONF_ADC_0_MUXNEG
-#define CONF_ADC_0_MUXNEG 0x0
+#define CONF_ADC_0_MUXNEG 0x18
 #endif
 
 // </h>
@@ -203,14 +203,14 @@
 // <i> Define how many samples should be added together.The result will be available in the Result register (SAMPLENUM)
 // <id> adc_arch_samplenum
 #ifndef CONF_ADC_0_SAMPLENUM
-#define CONF_ADC_0_SAMPLENUM 0x4
+#define CONF_ADC_0_SAMPLENUM 0xa
 #endif
 
 // <o> Sampling Time Length <0-63>
 // <i> These bits control the ADC sampling time in number of half CLK_ADC cycles, depending of the prescaler value, thus controlling the ADC input impedance. (SAMPLEN)
 // <id> adc_arch_samplen
 #ifndef CONF_ADC_0_SAMPLEN
-#define CONF_ADC_0_SAMPLEN 20
+#define CONF_ADC_0_SAMPLEN 100
 #endif
 
 // <o> Window Monitor Mode
