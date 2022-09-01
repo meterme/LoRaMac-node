@@ -244,7 +244,7 @@ SX1276SetRfTxPower( int8_t power )
     // XXX: indicate power level with LED_RX, on > 20dBm
     GpioWrite(&LedRx, (power > 20));
 
-    power -= 10;
+    power -= 8;
     
     paConfig = SX1276Read( REG_PACONFIG );
     paDac = SX1276Read( REG_PADAC );
