@@ -63,9 +63,43 @@
 Uart_t Uart1;
 Uart_t Uart2;
 
+Adc_t Adc;
+
 #if defined( LR1110MB1XXS )
     extern lr1110_t LR1110;
 #endif
+
+/*!
+ * Factory power supply
+ */
+#define FACTORY_POWER_SUPPLY                        3300 // mV
+
+/*!
+ * VREF calibration value
+ */
+#define VREFINT_CAL                                 ( *( uint16_t* )0x1FF800F8U )
+
+/*!
+ * ADC maximum value
+ */
+#define ADC_MAX_VALUE                               4095
+
+static uint16_t vddRef;
+
+uint16_t readAdc(void)
+{
+    uint32_t val = 0;
+
+    for (int i = 0; i < 1024; i++) {
+        val += AdcReadChannel( &Adc, ADC_CHANNEL_1 );
+    }
+
+    val /= 1024;
+    val = ((float) val * (float) vddRef) / (float) ADC_MAX_VALUE;
+    return ( val );
+}
+
+
 
 /*!
  * Initializes the unused GPIO to a know status
@@ -149,8 +183,11 @@ void BoardInitPeriph( void )
 
 void BoardInitMcu( void )
 {
+    volatile uint16_t vref;
+
     if( McuInitialized == false )
     {
+
         HAL_Init( );
 
         // LEDs
@@ -181,6 +218,12 @@ void BoardInitMcu( void )
             // Disables OFF mode - Enables lowest power mode (STOP)
             LpmSetOffMode( LPM_APPLI_ID, LPM_DISABLE );
         }
+
+        AdcInit(&Adc, ADC_IN1);
+        for (int i = 0; i < 10; i++) {
+            vref = AdcReadChannel( &Adc, ADC_CHANNEL_VREFINT );
+        }
+        vddRef = ( float )FACTORY_POWER_SUPPLY * ( float )VREFINT_CAL / ( float )vref;
     }
     else
     {

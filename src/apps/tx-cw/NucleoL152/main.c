@@ -24,6 +24,10 @@
 #include "gpio.h"
 #include "timer.h"
 #include "radio.h"
+#include "delay.h"
+#include <math.h>
+
+extern uint16_t readAdc();
 
 #if defined( REGION_AS923 )
 
@@ -67,7 +71,7 @@
 
 #elif defined( REGION_US915 )
 
-#define RF_FREQUENCY                                915000000 // Hz
+#define RF_FREQUENCY                                910000000 // Hz
 #define TX_OUTPUT_POWER                             14        // 14 dBm
 
 #elif defined( REGION_RU864 )
@@ -80,13 +84,16 @@
     #error "Please define a frequency band in the compiler options."
 
 #endif
-#define TX_TIMEOUT                                  10        // seconds (MAX value)
+#define TX_TIMEOUT                                  1     // seconds (MAX value)
 
-static TimerEvent_t Led1Timer;
-volatile bool Led1TimerEvent = false;
+int8_t txPower;
+int16_t txVal;
+int16_t aVal;
+float floorPower;
+float fVal[33];
+float pVal[33];
 
-static TimerEvent_t Led2Timer;
-volatile bool Led2TimerEvent = false;
+volatile bool txDone = false;
 
 /*!
  * Radio events function pointer
@@ -94,35 +101,26 @@ volatile bool Led2TimerEvent = false;
 static RadioEvents_t RadioEvents;
 
 /*!
- * LED GPIO pins objects
- */
-extern Gpio_t Led1;
-extern Gpio_t Led2;
-
-/*!
- * \brief Function executed on Led 1 Timeout event
- */
-void OnLed1TimerEvent( void* context )
-{
-    Led1TimerEvent = true;
-}
-
-/*!
- * \brief Function executed on Led 2 Timeout event
- */
-void OnLed2TimerEvent( void* context )
-{
-    Led2TimerEvent = true;
-}
-
-/*!
  * \brief Function executed on Radio Tx Timeout event
  */
 void OnRadioTxTimeout( void )
 {
     // Restarts continuous wave transmission when timeout expires
-    Radio.SetTxContinuousWave( RF_FREQUENCY, TX_OUTPUT_POWER, TX_TIMEOUT );
+    //Radio.Standby();
+    txDone = true;
 }
+
+float
+convertdBm(float mVal)
+{
+    float adjV, p, dBm;
+
+    adjV = mVal / 1.9f;
+    p = (adjV * adjV) / 50.0f;
+    dBm = 10.0f * log10f(p * 1000.0f);
+    return (dBm + 29.5f);
+}
+
 
 /**
  * Main application entry point.
@@ -133,50 +131,37 @@ int main( void )
     BoardInitMcu( );
     BoardInitPeriph( );
 
-    TimerInit( &Led1Timer, OnLed1TimerEvent );
-    TimerSetValue( &Led1Timer, 90 );
-
-    TimerInit( &Led2Timer, OnLed2TimerEvent );
-    TimerSetValue( &Led2Timer, 90 );
-
-    // Switch LED 1 ON
-    GpioWrite( &Led1, 0 );
-    TimerStart( &Led1Timer );
+    // get 'floor' base power reading
+    aVal = readAdc();
+    floorPower = convertdBm((float) aVal / 1000.0f);
 
     // Radio initialization
     RadioEvents.TxTimeout = OnRadioTxTimeout;
     Radio.Init( &RadioEvents );
 
-    Radio.SetTxContinuousWave( RF_FREQUENCY, TX_OUTPUT_POWER, TX_TIMEOUT );
+    for (txPower = -10; txPower < 23; txPower++) {
+        uint8_t n = txPower + 10;
+
+        txDone = false;
+        Radio.SetTxContinuousWave( RF_FREQUENCY, txPower, TX_TIMEOUT );
+        Delay(0.2);
+        aVal = readAdc();
+        fVal[n] = (float) aVal / 1000.0f;
+        pVal[n] = convertdBm(fVal[n]);
+
+        while (!txDone) {
+            // wait
+            TimerProcess();
+        }
+        Radio.Standby();
+        Delay(1.0);
+    }
+    // Radio.SetTxContinuousWave( RF_FREQUENCY, txPower, TX_TIMEOUT );
 
     // Blink LEDs just to show some activity
     while( 1 )
     {
-        // Process Radio IRQ
-        if( Radio.IrqProcess != NULL )
-        {
-            Radio.IrqProcess( );
-        }
-        if( Led1TimerEvent == true )
-        {
-            Led1TimerEvent = false;
-
-            // Switch LED 1 OFF
-            GpioWrite( &Led1, 1 );
-            // Switch LED 2 ON
-            GpioWrite( &Led2, 0 );
-            TimerStart( &Led2Timer );
-        }
-
-        if( Led2TimerEvent == true )
-        {
-            Led2TimerEvent = false;
-
-            // Switch LED 2 OFF
-            GpioWrite( &Led2, 1 );
-            // Switch LED 1 ON
-            GpioWrite( &Led1, 0 );
-            TimerStart( &Led1Timer );
-        }
+        // Tick the RTC to execute callback in context of the main loop (in stead of the IRQ)
+        TimerProcess( );
     }
 }

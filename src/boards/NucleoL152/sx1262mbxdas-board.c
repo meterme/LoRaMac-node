@@ -328,55 +328,9 @@ void SX126xReadBuffer( uint8_t offset, uint8_t *buffer, uint8_t size )
     SX126xWaitOnBusy( );
 }
 
-//
-// Lacking a better conversion function and relatively
-// poor resolution betweenm +6dBm and +21dBm output, use
-// this estimated table based on eByte data
-
-static int8_t powerTable[] = {
-    -5,     //  +0 dBm output
-    -4,     //  +1 dBm output
-    -3,     //  +2 dBm output
-    -2,     //  +3 dBm output
-    -1,     //  +4 dBm output
-    0,     //  +5 dBm output
-    0,     //  +6 dBm output *
-    0,     //  +7 dBm output
-    1,     //  +8 dBm output
-    1,     //  +9 dBm output
-    1,     // +10 dBm output
-    1,     // +11 dBm output
-    1,     // +12 dBm output
-    2,     // +13 dBm output
-    2,     // +14 dBm output
-    2,     // +15 dBm output
-    2,     // +16 dBm output
-    3,     // +17 dBm output
-    3,     // +18 dBm output
-    3,     // +19 dBm output
-    4,     // +20 dBm output
-    4,     // +21 dBm output *
-    5,     // +22 dBm output
-    6,     // +23 dBm output
-    7,     // +24 dBm output *
-    8,     // +25 dBm output
-    10,     // +26 dBm output
-    11,     // +27 dBm output *
-    14,     // +28 dBm output
-    16,     // +29 dBm output
-};
 
 void SX126xSetRfTxPower( int8_t power )
 {
-    // XXX: simple adjustment for E22-M900M30S PA gain
-    if (power > 29) {
-        power -= 14;
-    } else if (power < 0) {
-        power -= 4;
-    } else {
-        power = powerTable[power];
-    }
-
     SX126xSetTxParams( power, RADIO_RAMP_40_US );
 }
 

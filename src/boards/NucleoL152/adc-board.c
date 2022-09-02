@@ -43,8 +43,9 @@ void AdcMcuInit( Adc_t *obj, PinNames adcInput )
 void AdcMcuConfig( void )
 {
     // Configure ADC
+    AdcHandle.Init.ClockPrescaler        = ADC_CLOCK_ASYNC_DIV1;
     AdcHandle.Init.Resolution            = ADC_RESOLUTION_12B;
-    AdcHandle.Init.DataAlign             = ADC_DATAALIGN_RIGHT;
+    AdcHandle.Init.DataAlign             = ADC_DATAALIGN_LEFT;
     AdcHandle.Init.ContinuousConvMode    = DISABLE;
     AdcHandle.Init.DiscontinuousConvMode = DISABLE;
     AdcHandle.Init.ExternalTrigConvEdge  = ADC_EXTERNALTRIGCONVEDGE_NONE;

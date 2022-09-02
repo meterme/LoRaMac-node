@@ -131,6 +131,12 @@ extern "C"
 #define UART1_TX                                     PA_9
 #define UART1_RX                                     PA_10
 
+#define ADC_IN1                                      PA_1
+
+#define ADC_INPUT                                    ADC_CHANNEL_1
+#define ADC_VREFINT                                  ADC_CHANNEL_VREFINT
+#define ADC_TEMPSENSOR                               ADC_CHANNEL_TEMPSENSOR
+
 #ifdef __cplusplus
 }
 #endif
