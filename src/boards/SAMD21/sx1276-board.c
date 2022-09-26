@@ -244,7 +244,7 @@ SX1276SetRfTxPower( int8_t power )
     // XXX: indicate power level with LED_RX, on > 20dBm
     GpioWrite(&LedRx, (power > 20));
 
-    power -= 8;
+    power -= 17; // Adjust for 17dB gain in E19-900M30S module
     
     paConfig = SX1276Read( REG_PACONFIG );
     paDac = SX1276Read( REG_PADAC );
