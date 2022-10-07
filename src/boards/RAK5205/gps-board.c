@@ -59,7 +59,9 @@ void GpsMcuOnPpsSignal( void* context )
 {
 #ifdef GPS_PPS
     bool parseData = false;
+    extern Gpio_t Led2;
 
+    GpioToggle(&Led2);
     GpsPpsHandler( &parseData );
 
     if( parseData == true )

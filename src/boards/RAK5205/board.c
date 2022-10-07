@@ -153,12 +153,14 @@ void BoardInitMcu( void )
         HAL_Init( );
 
         SystemClockConfig( );
+        
         UartInit(&Uart1, UART_1, UART_TX, UART_RX);
         UartConfig(&Uart1, RX_TX, 115200,
                     UART_8_BIT,
                     UART_1_STOP_BIT,
                     NO_PARITY,
                     NO_FLOW_CTRL);
+
         RtcInit( );
 
         BoardUnusedIoInit( );
