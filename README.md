@@ -1,4 +1,5 @@
 # LoRaWAN end-device stack implementation and example projects
+# Sparkfun SparkX ProRF 1W tracker science experiment (based on v4.4.7)
 
       ______                              _
      / _____)             _              | |
