@@ -1,4 +1,5 @@
 # LoRaWAN end-device stack implementation and example projects
+# RAK5205 Tracker (based on v4.4.7)
 
       ______                              _
      / _____)             _              | |
