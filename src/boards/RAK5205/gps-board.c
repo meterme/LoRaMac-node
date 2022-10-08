@@ -59,9 +59,7 @@ void GpsMcuOnPpsSignal( void* context )
 {
 #ifdef GPS_PPS
     bool parseData = false;
-    extern Gpio_t Led2;
 
-    GpioToggle(&Led2);
     GpsPpsHandler( &parseData );
 
     if( parseData == true )
@@ -105,10 +103,8 @@ void GpsMcuInit( void )
 
     GpsMcuStart( );
 
-#ifndef GPS_PPS     
     UartInit( &GpsUart, GPS_UART, GPS_UART_TX, GPS_UART_RX );
-    UartConfig( &GpsUart, RX_ONLY, 9600, UART_8_BIT, UART_1_STOP_BIT, NO_PARITY, NO_FLOW_CTRL );
-#endif   
+    UartConfig( &GpsUart, RX_ONLY, 9600, UART_8_BIT, UART_1_STOP_BIT, NO_PARITY, NO_FLOW_CTRL );   
 }
 
 void GpsMcuStart( void )
@@ -146,7 +142,7 @@ void GpsMcuIrqNotify( UartNotifyId_t id )
 							  //printf("%d\n",NmeaStringSize);
                 GpsParseGpsData( ( int8_t* )NmeaString, NmeaStringSize );
 #ifdef GPS_PPS   
-                UartDeInit( &GpsUart );
+                //UartDeInit( &GpsUart );
 #endif
                 // XXX: BlockLowPowerDuringTask ( false );
             }

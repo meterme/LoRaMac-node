@@ -40,9 +40,6 @@
 #include "lpm-board.h"
 #include "rtc-board.h"
 #include "sx1276-board.h"
-#if defined( USE_USB_CDC )
-#include "uart-usb-board.h"
-#endif
 #include "board.h"
 
 /*!
@@ -63,13 +60,10 @@ Gpio_t Led2;
  */
 Adc_t Adc;
 I2c_t I2c;
-Uart_t Uart1;
-Uart_t Uart2;
-Uart_t Uart3;
+
+/// @brief UART structures
+Uart_t ConsoleUart;
 Uart_t GpsUart;
-#if defined( USE_USB_CDC )
-Uart_t UartUsb;
-#endif
 
 /*!
  * Initializes the unused GPIO to a know status
@@ -132,48 +126,41 @@ void BoardInitPeriph( void )
 
     // Init the GPIO pins
     GpioInit( &ioPin, GPS_POWER_ON, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
-    GpioInit( &Led1, LED_1, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
-    GpioInit( &Led2, LED_2, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
 
     //Init GPS
     GpsInit( );
 
    //Init LIS3DH
    //LIS3DH_Init( );
-
-    // Switch LED 1, 2 OFF
-    GpioWrite( &Led1, 1 );
-    GpioWrite( &Led2, 1 );
 }
 
 void BoardInitMcu( void )
 {
-    if( McuInitialized == false )
-    {
+    if( McuInitialized == false ) {
         HAL_Init( );
 
         SystemClockConfig( );
-        
-        UartInit(&Uart1, UART_1, UART_TX, UART_RX);
-        UartConfig(&Uart1, RX_TX, 115200,
+        UartInit(&ConsoleUart, UART_1, UART_TX, UART_RX);
+        UartConfig(&ConsoleUart, RX_TX, 115200,
                     UART_8_BIT,
                     UART_1_STOP_BIT,
                     NO_PARITY,
                     NO_FLOW_CTRL);
-
         RtcInit( );
 
         BoardUnusedIoInit( );
-        if( GetBoardPowerSource( ) == BATTERY_POWER )
-        {
+        if( GetBoardPowerSource( ) == BATTERY_POWER ) {
             // Disables OFF mode - Enables lowest power mode (STOP)
             LpmSetOffMode( LPM_APPLI_ID, LPM_DISABLE );
         }
-    }
-    else
-    {
+    } else {
         SystemClockReConfig( );
     }
+
+    // initialize LEDs early
+    // Switch LED 1, 2 OFF
+    GpioInit( &Led1, LED_1, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 1 );
+    GpioInit( &Led2, LED_2, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 1 );
 
     AdcInit( &Adc, BAT_LEVEL_PIN );
 
@@ -181,13 +168,11 @@ void BoardInitMcu( void )
     SX1276IoInit( );
     GpioInit( &SX1276.Xtal, RADIO_XTAL_EN, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 1 );
 
-    if( McuInitialized == false )
-    {
+    if( McuInitialized == false ) {
         McuInitialized = true;
         SX1276IoDbgInit( );
         SX1276IoTcxoInit( );
-        if( GetBoardPowerSource( ) == BATTERY_POWER )
-        {
+        if( GetBoardPowerSource( ) == BATTERY_POWER ) {
             CalibrateSystemWakeupTime( );
         }
     }
@@ -505,7 +490,7 @@ void BoardLowPowerHandler( void )
  */
 int _write( int fd, const void *buf, size_t count )
 {
-    while( UartPutBuffer( &Uart1, ( uint8_t* )buf, ( uint16_t )count ) != 0 ){ };
+    while( UartPutBuffer( &ConsoleUart, ( uint8_t* )buf, ( uint16_t )count ) != 0 ){ };
     return count;
 }
 
@@ -515,9 +500,9 @@ int _write( int fd, const void *buf, size_t count )
 int _read( int fd, const void *buf, size_t count )
 {
     size_t bytesRead = 0;
-    while( UartGetBuffer( &Uart1, ( uint8_t* )buf, count, ( uint16_t* )&bytesRead ) != 0 ){ };
+    while( UartGetBuffer( &ConsoleUart, ( uint8_t* )buf, count, ( uint16_t* )&bytesRead ) != 0 ){ };
     // Echo back the character
-    while( UartPutBuffer( &Uart1, ( uint8_t* )buf, ( uint16_t )bytesRead ) != 0 ){ };
+    while( UartPutBuffer( &ConsoleUart, ( uint8_t* )buf, ( uint16_t )bytesRead ) != 0 ){ };
     return bytesRead;
 }
 
@@ -528,16 +513,16 @@ int _read( int fd, const void *buf, size_t count )
 // Keil compiler
 int fputc( int c, FILE *stream )
 {
-    while( UartPutChar( &Uart1, ( uint8_t )c ) != 0 );
+    while( UartPutChar( &ConsoleUart, ( uint8_t )c ) != 0 );
     return c;
 }
 
 int fgetc( FILE *stream )
 {
     uint8_t c = 0;
-    while( UartGetChar( &Uart1, &c ) != 0 );
+    while( UartGetChar( &ConsoleUart, &c ) != 0 );
     // Echo back the character
-    while( UartPutChar( &Uart1, c ) != 0 );
+    while( UartPutChar( &ConsoleUart, c ) != 0 );
     return ( int )c;
 }
 

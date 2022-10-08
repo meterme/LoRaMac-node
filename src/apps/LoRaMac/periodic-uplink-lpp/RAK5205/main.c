@@ -51,13 +51,13 @@
 /*!
  * Defines the application data transmission duty cycle. 5s, value in [ms].
  */
-#define APP_TX_DUTYCYCLE                            300000
+#define APP_TX_DUTYCYCLE                            20000
 
 /*!
  * Defines a random delay for application data transmission duty cycle. 1s,
  * value in [ms].
  */
-#define APP_TX_DUTYCYCLE_RND                        1000
+#define APP_TX_DUTYCYCLE_RND                        5000
 
 /*!
  * LoRaWAN Adaptive Data Rate
@@ -239,7 +239,7 @@ extern Gpio_t Led2;
 /*!
  * UART object used for command line interface handling
  */
-extern Uart_t Uart1;
+extern Uart_t ConsoleUart;
 
 /*!
  * Main application entry point.
@@ -249,13 +249,13 @@ int main( void )
     BoardInitMcu( );
     BoardInitPeriph( );
     
-    GpioWrite(&Led2, 0);
+    GpioWrite(&Led2, 1);
 
     TimerInit( &Led4Timer, OnLed4TimerEvent );
     TimerSetValue( &Led4Timer, 25 );
 
     TimerInit( &Led2Timer, OnLed2TimerEvent );
-    TimerSetValue( &Led2Timer, 25 );
+    TimerSetValue( &Led2Timer, 250 );
 
     TimerInit( &LedBeaconTimer, OnLedBeaconTimerEvent );
     TimerSetValue( &LedBeaconTimer, 5000 );
@@ -288,10 +288,10 @@ int main( void )
 
     while( 1 )
     {
-        GpioToggle(&Led2);
+        // GpioToggle(&Led2);
         
         // Process characters sent over the command line interface
-        CliProcess( &Uart1 );
+        CliProcess( &ConsoleUart );
 
         // Processes the LoRaMac events
         LmHandlerProcess( );
@@ -349,6 +349,7 @@ static void OnJoinRequest( LmHandlerJoinParams_t* params )
     else
     {
         LmHandlerRequestClass( LORAWAN_DEFAULT_CLASS );
+        IsTxFramePending = 1;
     }
 }
 
@@ -375,8 +376,8 @@ static void OnRxData( LmHandlerAppData_t* appData, LmHandlerRxParams_t* params )
     }
 
     // Switch LED 2 ON for each received downlink
-    GpioWrite( &Led2, 1 );
-    TimerStart( &Led2Timer );
+    // GpioWrite( &Led2, 1 );
+    // TimerStart( &Led2Timer );
 }
 
 static void OnClassChange( DeviceClass_t deviceClass )
@@ -429,40 +430,66 @@ static void OnSysTimeUpdate( void )
 }
 #endif
 
+
+#include <stdlib.h>
+#include <math.h>
+
+extern NmeaGpsData_t NmeaGpsData;
+
+#define htonl(x) ( ((x)<<24 & 0xFF000000UL) | \
+                   ((x)<< 8 & 0x00FF0000UL) | \
+                   ((x)>> 8 & 0x0000FF00UL) | \
+                   ((x)>>24 & 0x000000FFUL) )
+
+#define htons(x) ( ((x)<< 8 & 0x0000FF00UL) | \
+                   ((x)>> 8 & 0x000000FFUL) )
+
 /*!
  * Prepares the payload of the frame and transmits it.
  */
 static void PrepareTxFrame( void )
 {
+    double lat, lng;
+    double hdop;
+    double altitude;
+    double speed;
+    bool fix;
+
     if( LmHandlerIsBusy( ) == true )
     {
         return;
     }
 
-    uint8_t channel = 0;
+    fix = GpsHasFix();
+
+    if (fix) {
+        altitude = strtod(NmeaGpsData.NmeaAltitude, NULL);
+        hdop = strtod(NmeaGpsData.NmeaHorizontalDilution, NULL);
+        speed = strtod(NmeaGpsData.NmeaSpeed, NULL);
+        GpsGetLatestGpsPositionDouble(&lat, &lng);
+
+        *((uint32_t *)(AppDataBuffer + 0)) = htonl((int32_t)(lat * 1000000.0));
+        *((uint32_t *)(AppDataBuffer + 4)) = htonl((int32_t)(lng * 1000000.0));
+        *((uint16_t *)(AppDataBuffer + 8)) = htons(4000); // mV
+        AppDataBuffer[10] = 0x04;                         // FLAG, LED off, no movement mode, version 1.6.4
+        *((uint16_t *)(AppDataBuffer + 11)) = htons(0);   // roll
+        *((uint16_t *)(AppDataBuffer + 13)) = htons(0);   // pitch
+        AppDataBuffer[15] = (int8_t)(hdop * 100.0);
+        *((uint16_t *)(AppDataBuffer + 16)) = htons((int16_t)(round(altitude) * 100.0)); // altitude
+    } else {
+        // no fix
+        *((uint32_t *)(AppDataBuffer + 0)) = 0xffffffff;
+        *((uint32_t *)(AppDataBuffer + 4)) = 0xffffffff;
+    }
 
     AppData.Port = LORAWAN_APP_PORT;
-
-    CayenneLppReset( );
-
-    uint16_t vdd = 0;
-
-    // Read the current voltage level
-    BoardGetBatteryLevel( ); // Updates the value returned by BoardGetBatteryVoltage( ) function.
-    vdd = BoardGetBatteryVoltage( );
-
-    CayenneLppAddDigitalInput( channel++, AppLedStateOn );
-    CayenneLppAddAnalogInput( channel++, BoardGetBatteryLevel( ) * 100 / 254 );
-    CayenneLppAddAnalogInput( channel++, vdd );
-
-    CayenneLppCopy( AppData.Buffer );
-    AppData.BufferSize = CayenneLppGetSize( );
+    AppData.BufferSize = 18;
 
     if( LmHandlerSend( &AppData, LORAWAN_DEFAULT_CONFIRMED_MSG_STATE ) == LORAMAC_HANDLER_SUCCESS )
     {
-        // Switch LED 4 ON
-        // XXX: GpioWrite( &Led4, 1 );
-        TimerStart( &Led4Timer );
+        // Switch LED 2 ON
+        GpioWrite( &Led2, 0 );
+        TimerStart( &Led2Timer );
     }
 }
 
@@ -521,7 +548,7 @@ static void OnLed4TimerEvent( void* context )
 {
     TimerStop( &Led4Timer );
     // Switch LED 4 OFF
-    // XXX: GpioWrite( &Led4, 0 );
+    // GpioWrite( &Led4, 1 );
 }
 
 /*!
@@ -531,7 +558,7 @@ static void OnLed2TimerEvent( void* context )
 {
     TimerStop( &Led2Timer );
     // Switch LED 2 OFF
-    GpioWrite( &Led2, 0 );
+    GpioWrite( &Led2, 1 );
 }
 
 /*!
@@ -539,7 +566,7 @@ static void OnLed2TimerEvent( void* context )
  */
 static void OnLedBeaconTimerEvent( void* context )
 {
-    GpioWrite( &Led2, 1 );
+    // GpioWrite( &Led2, 1 );
     TimerStart( &Led2Timer );
 
     TimerStart( &LedBeaconTimer );

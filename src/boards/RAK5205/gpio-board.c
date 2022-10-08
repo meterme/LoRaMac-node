@@ -34,14 +34,12 @@ static Gpio_t *GpioIrq[16];
 
 void GpioMcuInit( Gpio_t *obj, PinNames pin, PinModes mode, PinConfigs config, PinTypes type, uint32_t value )
 {
-    if( pin < IOE_0 )
-    {
+    if ( pin < IOE_0 ) {
         GPIO_InitTypeDef GPIO_InitStructure;
 
         obj->pin = pin;
 
-        if( pin == NC )
-        {
+        if( pin == NC ) {
             return;
         }
 
@@ -77,41 +75,28 @@ void GpioMcuInit( Gpio_t *obj, PinNames pin, PinModes mode, PinConfigs config, P
         GPIO_InitStructure.Pull = obj->pull = type;
         GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
 
-        if( mode == PIN_INPUT )
-        {
+        if ( mode == PIN_INPUT ) {
             GPIO_InitStructure.Mode = GPIO_MODE_INPUT;
-        }
-        else if( mode == PIN_ANALOGIC )
-        {
+        } else if ( mode == PIN_ANALOGIC ) {
             GPIO_InitStructure.Mode = GPIO_MODE_ANALOG;
-        }
-        else if( mode == PIN_ALTERNATE_FCT )
-        {
-            if( config == PIN_OPEN_DRAIN )
-            {
+        } else if ( mode == PIN_ALTERNATE_FCT ) {
+            if ( config == PIN_OPEN_DRAIN ) {
                 GPIO_InitStructure.Mode = GPIO_MODE_AF_OD;
-            }
-            else
-            {
+            } else {
                 GPIO_InitStructure.Mode = GPIO_MODE_AF_PP;
             }
             GPIO_InitStructure.Alternate = value;
-        }
-        else // mode output
-        {
-            if( config == PIN_OPEN_DRAIN )
-            {
+        } else {
+            // mode output
+            if ( config == PIN_OPEN_DRAIN ) {
                 GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_OD;
-            }
-            else
-            {
+            } else {
                 GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
             }
         }
 
         // Sets initial output value
-        if( mode == PIN_OUTPUT )
-        {
+        if ( mode == PIN_OUTPUT ) {
             GpioMcuWrite( obj, value );
         }
 

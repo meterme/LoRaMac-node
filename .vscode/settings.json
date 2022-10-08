@@ -82,6 +82,8 @@
         "REGION_AS923_DEFAULT_CHANNEL_PLAN":"CHANNEL_PLAN_GROUP_AS923_1"
     },
     "files.associations": {
-        "gps.h": "c"
+        "gps.h": "c",
+        "*.tcc": "c",
+        "cmath": "c"
     }
 }
