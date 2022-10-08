@@ -1,5 +1,6 @@
 # LoRaWAN end-device stack implementation and example projects
-# RAK5205 Tracker (based on v4.4.7, another K6JQ Science Fair Experiment)
+## RAK5205 Tracker (based on v4.4.7, another K6JQ Science Fair Experiment)
+Based on https://github.com/jobroe/loramac-node-rak811 
 
       ______                              _
      / _____)             _              | |
