@@ -110,7 +110,7 @@ extern "C" {
              * WARNING: FOR 1.0.x DEVICES IT IS THE \ref LORAWAN_APP_KEY                                            \
              */                                                                                                     \
             .KeyID    = NWK_KEY,                                                                                    \
-            .KeyValue = { 0x66, 0xB0, 0xD8, 0x80, 0xFF, 0x8D, 0x92, 0x5F, 0x17, 0x47, 0x6C, 0x25, 0xBA, 0xC5, 0x82, \
+            .KeyValue = { 0x56, 0xB0, 0x58, 0x80, 0xFF, 0x5D, 0x92, 0x5F, 0x17, 0x47, 0x6C, 0x25, 0xBA, 0xC5, 0x82, \
                          0x68 }                                                                                     \
         },                                                                                                          \
         {                                                                                                           \
