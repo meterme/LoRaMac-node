@@ -55,6 +55,11 @@ typedef struct
 }NmeaGpsData_t;
 
 /*!
+ * \brief Process a single character under interrupt
+ */
+void processGpsChar(uint8_t c);
+
+/*!
  * \brief Initializes the handling of the GPS receiver
  */
 void GpsInit( void );

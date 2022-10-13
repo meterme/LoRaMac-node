@@ -71,12 +71,12 @@ extern "C" {
 /*!
  * end-device IEEE EUI (big endian)
  */
-#define LORAWAN_DEVICE_EUI                                 { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
+#define LORAWAN_DEVICE_EUI                                 { 0x60, 0xC5, 0xA8, 0xFF, 0xFE, 0x6d, 0x01, 0x74 }
 
 /*!
  * App/Join server IEEE EUI (big endian)
  */
-#define LORAWAN_JOIN_EUI                                   { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
+#define LORAWAN_JOIN_EUI                                   { 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11 }
 
 /*!
  * Secure-element pin
@@ -112,8 +112,8 @@ extern "C" {
              * WARNING: FOR 1.0.x DEVICES IT IS THE \ref LORAWAN_APP_KEY                                            \
              */                                                                                                     \
             .KeyID    = NWK_KEY,                                                                                    \
-            .KeyValue = { 0x2B, 0x7E, 0x15, 0x16, 0x28, 0xAE, 0xD2, 0xA6, 0xAB, 0xF7, 0x15, 0x88, 0x09, 0xCF, 0x4F, \
-                          0x3C },                                                                                   \
+            .KeyValue = { 0x66, 0xb0, 0xd8, 0x80, 0xff, 0x8d, 0x92, 0x5f, 0x17, 0x47, 0x6c, 0x25, 0xba, 0xc5, 0x82, \
+                         0x68 }                                                                                     \
         },                                                                                                          \
         {                                                                                                           \
             /*!                                                                                                     \
