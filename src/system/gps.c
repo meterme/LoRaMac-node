@@ -313,6 +313,222 @@ static bool GpsNmeaValidateChecksum( int8_t *serialBuff, int32_t buffSize )
     }
 }
 
+
+/*
+ *
+ */
+
+
+#include    <math.h>
+
+extern volatile uint8_t gpsReportPending;
+
+#define GPS_MAX_FIELDS  30
+
+static char gpsBuffer[83];
+
+static enum { GP_BEGIN, GP_COMMA, GP_CHECK } gpsState = GP_BEGIN;
+static uint8_t gpsIndex;
+static char *gpsField[GPS_MAX_FIELDS];
+static char *gpsPtr = gpsBuffer;
+
+uint8_t coords[18] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+
+static double lastLat, lastLng;
+static bool lastPositionValid = false;
+
+static double
+degreesToRadians(double degrees)
+{
+    return ((degrees * M_PI) / 180.0);
+}
+
+static float
+gpsDistance(double lat1, double lon1, double lat2, double lon2)
+{
+    const double earthRadiusKm = 6371.0;
+    double dLat, dLon;
+    double a, c;
+    
+    dLat = degreesToRadians(lat2 - lat1);
+    dLon = degreesToRadians(lon2 - lon1);
+    lat1 = degreesToRadians(lat1);
+    lat2 = degreesToRadians(lat2);
+    
+    a = sin(dLat / 2.0) * sin(dLat / 2.0) +
+      sin(dLon / 2.0) * sin(dLon / 2.0) * cos(lat1) * cos(lat2); 
+    
+    c = 2.0 * atan2(sqrt(a), sqrt(1-a));
+    return (earthRadiusKm * c);
+}
+
+static double
+scanDDMM(char *p)
+{
+    double v, d;
+
+    v = strtod(p, NULL);
+    d = floor(v / 100.0);
+    v -= d * 100.0;
+    d += v / 60.0;
+    
+    return (d);
+}
+
+static void
+processGpsGGA(void)
+{
+    double lat, lon;
+    float hdop, altitude;
+
+    // memset(coords, 0xff, sizeof(coords));
+
+    // GGA has 16 total fields
+    // 2, 3: lat, 4, 5: long, 6: fix, 8: hdop, 9, 10: altitude
+    if (gpsIndex < 15) {
+        return;
+    }
+
+    if (atoi(gpsField[6]) < 2) {
+        // not good enough fix
+        return;
+    }
+
+    lat = scanDDMM(gpsField[2]);
+    if (*gpsField[3] == 'S') {
+        lat = -lat;
+    }
+
+    lon = scanDDMM(gpsField[4]);
+    if (*gpsField[5] == 'W') {
+        lon = -lon;
+    }
+
+    if (lastPositionValid && (gpsDistance(lat, lon, lastLat, lastLng) < 0.1)) {
+        return;
+    }
+
+    hdop = strtof(gpsField[8], NULL);
+
+    altitude = strtof(gpsField[9], NULL);
+
+    *((int32_t *)(coords + 0)) = __bswap32( (int32_t)(lat * 1000000L) );
+    *((int32_t *)(coords + 4)) = __bswap32( (int32_t)(lon * 1000000L) );
+
+    altitude = roundf(altitude);
+  
+    *((uint16_t *)(coords + 8)) = __bswap16(4000); // mV
+    coords[10] = 0x04; // FLAG, LED off, no movement mode, version 1.6.4
+    *((uint16_t *)(coords + 11)) = __bswap16(0); // roll
+    *((uint16_t *)(coords + 13)) = __bswap16(0); // pitch
+    coords[15] = (int8_t)(hdop * 100.0);
+    *((uint16_t *)(coords + 16)) = __bswap16((int16_t)(altitude * 100.0)); // altitude
+
+    lastLat = lat;
+    lastLng = lon;
+    lastPositionValid = true;
+
+    gpsReportPending = 1;
+}
+
+static void
+processGpsGSA(void)
+{
+
+}
+
+extern int LmHandlerJoinStatus(void);
+
+static void
+processGpsSentence(uint8_t check)
+{
+    uint8_t checkVal;
+
+    checkVal = strtol(gpsField[gpsIndex], NULL, 16);
+    if (checkVal != check || gpsIndex < 2) {
+        // invalid sentence, return
+        return;
+    }
+
+    if (strcmp(gpsField[0], "GPGGA") == 0) {
+        processGpsGGA();
+        return;
+    } else if (strcmp(gpsField[0], "GPGSA") == 0) {
+        processGpsGSA();
+        return;
+    }
+}
+
+void
+processGpsChar(uint8_t c)
+{
+    static uint8_t checkVal = 0;
+    static uint8_t gpsCount = 0;
+
+    switch (gpsState) {
+    case GP_BEGIN:
+        if (c != '$') {
+            break;
+        }
+        gpsIndex = 0;
+        gpsPtr = gpsBuffer;
+        gpsField[0] = gpsBuffer;
+        gpsState = GP_COMMA;
+        checkVal = 0;
+        gpsCount = 0;
+        break;
+
+    case GP_COMMA:
+        if (++gpsCount >= 82) {
+            // invalid
+            gpsState = GP_BEGIN;
+            break;
+        }
+
+        if (c == ',' || c == '*') {
+            *gpsPtr++ = '\0';
+            if (c == '*') {
+                gpsState = GP_CHECK;
+            } else {
+                checkVal ^= c;
+            }
+            gpsField[++gpsIndex] = gpsPtr;
+            break;
+        } else {
+            *gpsPtr++ = c;
+            checkVal ^= c;
+            break;
+        }
+        break;
+
+    case GP_CHECK:
+        if (++gpsCount >= 82) {
+            // invalid
+            gpsState = GP_BEGIN;
+            break;
+        }
+
+        if (c == '\n' || c == '\r') {
+            *gpsPtr++ = '\0';
+            processGpsSentence(checkVal);
+            gpsState = GP_BEGIN;
+        } else {
+            *gpsPtr++ = c;
+        }
+        break;
+
+    default:
+        gpsState = GP_BEGIN;
+        break;
+    }
+
+}
+
+
+/*
+ * XXX: old crap
+ */
+
 uint8_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
 {
     uint8_t i = 1;

@@ -84,6 +84,7 @@
     "files.associations": {
         "gps.h": "c",
         "*.tcc": "c",
-        "cmath": "c"
+        "cmath": "c",
+        "LMHANDLER.H": "cpp"
     }
 }

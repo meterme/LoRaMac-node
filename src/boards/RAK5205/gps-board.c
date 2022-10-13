@@ -129,6 +129,7 @@ void GpsMcuIrqNotify( UartNotifyId_t id )
     {
         if( UartGetChar( &GpsUart, &data ) == 0 )
         {
+#if 0
             if( ( data == '$' ) || ( NmeaStringSize >= 127 ) )
             {
                 NmeaStringSize = 0;
@@ -146,6 +147,10 @@ void GpsMcuIrqNotify( UartNotifyId_t id )
 #endif
                 // XXX: BlockLowPowerDuringTask ( false );
             }
+#else
+
+        processGpsChar(data);
+#endif
         }
     }
 }

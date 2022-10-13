@@ -51,7 +51,7 @@
 /*!
  * Defines the application data transmission duty cycle. 5s, value in [ms].
  */
-#define APP_TX_DUTYCYCLE                            20000
+#define APP_TX_DUTYCYCLE                            (15 * 60 * 1000UL)
 
 /*!
  * Defines a random delay for application data transmission duty cycle. 1s,
@@ -230,6 +230,8 @@ static volatile uint8_t IsMacProcessPending = 0;
 
 static volatile uint8_t IsTxFramePending = 0;
 
+volatile uint8_t gpsReportPending = 0;
+
 /*!
  * LED GPIO pins objects
  */
@@ -288,8 +290,7 @@ int main( void )
 
     while( 1 )
     {
-        // GpioToggle(&Led2);
-        
+
         // Process characters sent over the command line interface
         CliProcess( &ConsoleUart );
 
@@ -430,59 +431,34 @@ static void OnSysTimeUpdate( void )
 }
 #endif
 
-
-#include <stdlib.h>
-#include <math.h>
-
-extern NmeaGpsData_t NmeaGpsData;
-
-#define htonl(x) ( ((x)<<24 & 0xFF000000UL) | \
-                   ((x)<< 8 & 0x00FF0000UL) | \
-                   ((x)>> 8 & 0x0000FF00UL) | \
-                   ((x)>>24 & 0x000000FFUL) )
-
-#define htons(x) ( ((x)<< 8 & 0x0000FF00UL) | \
-                   ((x)>> 8 & 0x000000FFUL) )
+/*
+ *
+ */
+extern uint8_t coords[];
 
 /*!
  * Prepares the payload of the frame and transmits it.
  */
 static void PrepareTxFrame( void )
 {
-    double lat, lng;
-    double hdop;
-    double altitude;
-    double speed;
-    bool fix;
 
-    if( LmHandlerIsBusy( ) == true )
-    {
+    if (0xffffffffffffffffULL == *((uint64_t *)(coords + 0))) {
+        // Reset heartbeat transmission
+        TimerSetValue( &TxTimer, 10000 );
+        TimerStart( &TxTimer );
         return;
     }
 
-    fix = GpsHasFix();
-
-    if (fix) {
-        altitude = strtod(NmeaGpsData.NmeaAltitude, NULL);
-        hdop = strtod(NmeaGpsData.NmeaHorizontalDilution, NULL);
-        speed = strtod(NmeaGpsData.NmeaSpeed, NULL);
-        GpsGetLatestGpsPositionDouble(&lat, &lng);
-
-        *((uint32_t *)(AppDataBuffer + 0)) = htonl((int32_t)(lat * 1000000.0));
-        *((uint32_t *)(AppDataBuffer + 4)) = htonl((int32_t)(lng * 1000000.0));
-        *((uint16_t *)(AppDataBuffer + 8)) = htons(4000); // mV
-        AppDataBuffer[10] = 0x04;                         // FLAG, LED off, no movement mode, version 1.6.4
-        *((uint16_t *)(AppDataBuffer + 11)) = htons(0);   // roll
-        *((uint16_t *)(AppDataBuffer + 13)) = htons(0);   // pitch
-        AppDataBuffer[15] = (int8_t)(hdop * 100.0);
-        *((uint16_t *)(AppDataBuffer + 16)) = htons((int16_t)(round(altitude) * 100.0)); // altitude
-    } else {
-        // no fix
-        *((uint32_t *)(AppDataBuffer + 0)) = 0xffffffff;
-        *((uint32_t *)(AppDataBuffer + 4)) = 0xffffffff;
+    if( LmHandlerIsBusy( ) == true )
+    {
+        // XXX: set IsTxPending to retry
+        TimerSetValue( &TxTimer, 10000 );
+        TimerStart( &TxTimer );
+        return;
     }
 
     AppData.Port = LORAWAN_APP_PORT;
+    AppData.Buffer = coords;
     AppData.BufferSize = 18;
 
     if( LmHandlerSend( &AppData, LORAWAN_DEFAULT_CONFIRMED_MSG_STATE ) == LORAMAC_HANDLER_SUCCESS )
@@ -503,7 +479,8 @@ static void StartTxProcess( LmHandlerTxEvents_t txEvent )
         {
             // Schedule 1st packet transmission
             TimerInit( &TxTimer, OnTxTimerEvent );
-            TimerSetValue( &TxTimer, APP_TX_DUTYCYCLE  + randr( -APP_TX_DUTYCYCLE_RND, APP_TX_DUTYCYCLE_RND ) );
+            TimerSetValue( &TxTimer, 10000 );
+            TimerStart(&TxTimer);
             OnTxTimerEvent( NULL );
         }
         break;
@@ -517,9 +494,10 @@ static void StartTxProcess( LmHandlerTxEvents_t txEvent )
 static void UplinkProcess( void )
 {
     uint8_t isPending = 0;
+    
     CRITICAL_SECTION_BEGIN( );
-    isPending = IsTxFramePending;
-    IsTxFramePending = 0;
+    isPending = IsTxFramePending || gpsReportPending;
+    gpsReportPending = IsTxFramePending = 0;
     CRITICAL_SECTION_END( );
     if( isPending == 1 )
     {
@@ -535,7 +513,7 @@ static void OnTxTimerEvent( void* context )
     TimerStop( &TxTimer );
 
     IsTxFramePending = 1;
-
+    
     // Schedule next transmission
     TimerSetValue( &TxTimer, APP_TX_DUTYCYCLE + randr( -APP_TX_DUTYCYCLE_RND, APP_TX_DUTYCYCLE_RND ) );
     TimerStart( &TxTimer );
