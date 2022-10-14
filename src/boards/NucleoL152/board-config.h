@@ -56,7 +56,7 @@ extern "C"
 #define RADIO_MISO                                  PA_6
 #define RADIO_SCLK                                  PA_5
 
-#if defined( SX1261MBXBAS ) || defined( SX1262MBXCAS ) || defined( SX1262MBXDAS )
+#if defined( SX1261MBXBAS ) || defined( SX1262MBXCAS ) || defined( SX1262MBXDAS ) || defined( E22_900M30S )
 
 #define RADIO_NSS                                   PA_8
 #define RADIO_BUSY                                  PB_3
