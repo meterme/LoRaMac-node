@@ -75,6 +75,11 @@ Gpio_t AntCtxPa;
 Gpio_t AntCbtHf;
 Gpio_t AntCrxRx;
 
+/*!
+ * TCXO power control
+ */
+Gpio_t TcxoControl;
+
 void SX1276IoInit( void )
 {
     GpioInit( &SX1276.Spi.Nss, RADIO_NSS, PIN_OUTPUT, PIN_PUSH_PULL, PIN_PULL_UP, 1 );
@@ -122,23 +127,17 @@ void SX1276IoDbgInit( void )
 
 void SX1276IoTcxoInit( void )
 {
-    // No TCXO component available on this board design.
+    GpioInit( &TcxoControl, RADIO_XTAL_EN, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 1 );
 }
 
 void SX1276SetBoardTcxo( uint8_t state )
 {
-    // No TCXO component available on this board design.
-#if 0
-    if( state == true )
-    {
-        TCXO_ON( );
+    if ( state == true ) {
+        GpioWrite(&TcxoControl, 1);
         DelayMs( BOARD_TCXO_WAKEUP_TIME );
+    } else {
+        GpioWrite(&TcxoControl, 0);
     }
-    else
-    {
-        TCXO_OFF( );
-    }
-#endif
 }
 
 uint32_t SX1276GetBoardTcxoWakeupTime( void )

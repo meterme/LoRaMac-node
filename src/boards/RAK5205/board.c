@@ -146,7 +146,6 @@ void BoardInitMcu( void )
 
     SpiInit( &SX1276.Spi, SPI_1, RADIO_MOSI, RADIO_MISO, RADIO_SCLK, NC );
     SX1276IoInit( );
-    GpioInit( &SX1276.Xtal, RADIO_XTAL_EN, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 1 );
 
     if( McuInitialized == false ) {
         McuInitialized = true;
@@ -165,17 +164,9 @@ void BoardResetMcu( void )
 
 void BoardDeInitMcu( void )
 {
-    //Gpio_t ioPin;
-
     AdcDeInit( &Adc );
-
     SpiDeInit( &SX1276.Spi );
     SX1276IoDeInit( );
-
-    //GpioInit( &ioPin, OSC_LSE_IN, PIN_INPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
-    //GpioInit( &ioPin, OSC_LSE_OUT, PIN_INPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
-
-   GpioWrite( &SX1276.Xtal, 0 );
 }
 
 uint32_t BoardGetRandomSeed( void )
