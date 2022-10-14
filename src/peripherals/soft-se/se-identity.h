@@ -112,7 +112,7 @@ extern "C" {
              */                                                                                                     \
             .KeyID    = NWK_KEY,                                                                                    \
             .KeyValue = { 0xAD, 0x63, 0x59, 0x61, 0x15, 0x69, 0x7A, 0x26, 0x95, 0x87, 0x8E, 0x6B, 0x6F, 0x6F, 0xFB, \
-                         0x77 },                                                                                    \
+                        0x77 },                                                                                     \
         },                                                                                                          \
         {                                                                                                           \
             /*!                                                                                                     \

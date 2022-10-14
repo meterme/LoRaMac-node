@@ -33,7 +33,7 @@
 #include "lpm-board.h"
 #include "rtc-board.h"
 
-#if defined( SX1261MBXBAS ) || defined( SX1262MBXCAS ) || defined( SX1262MBXDAS )
+#if defined( SX1261MBXBAS ) || defined( SX1262MBXCAS ) || defined( SX1262MBXDAS ) || defined( E22_900M30S )
     #include "sx126x-board.h"
 #elif defined( LR1110MB1XXS )
     #include "lr1110-board.h"
@@ -166,7 +166,7 @@ void BoardInitMcu( void )
 
     AdcInit( &Adc, NC );  // Just initialize ADC
 
-#if defined( SX1261MBXBAS ) || defined( SX1262MBXCAS ) || defined( SX1262MBXDAS )
+#if defined( SX1261MBXBAS ) || defined( SX1262MBXCAS ) || defined( SX1262MBXDAS ) || defined( E22_900M30S )
     SpiInit( &SX126x.Spi, SPI_1, RADIO_MOSI, RADIO_MISO, RADIO_SCLK, NC );
     SX126xIoInit( );
 #elif defined( LR1110MB1XXS )
@@ -183,7 +183,7 @@ void BoardInitMcu( void )
     if( McuInitialized == false )
     {
         McuInitialized = true;
-#if defined( SX1261MBXBAS ) || defined( SX1262MBXCAS ) || defined( SX1262MBXDAS )
+#if defined( SX1261MBXBAS ) || defined( SX1262MBXCAS ) || defined( SX1262MBXDAS ) || defined( E22_900M30S )
         SX126xIoDbgInit( );
         // WARNING: If necessary the TCXO control is initialized by SX126xInit function.
 #elif defined( LR1110MB1XXS )
@@ -211,7 +211,7 @@ void BoardDeInitMcu( void )
 {
     AdcDeInit( &Adc );
 
-#if defined( SX1261MBXBAS ) || defined( SX1262MBXCAS ) || defined( SX1262MBXDAS )
+#if defined( SX1261MBXBAS ) || defined( SX1262MBXCAS ) || defined( SX1262MBXDAS ) || defined( E22_900M30S )
     SpiDeInit( &SX126x.Spi );
     SX126xIoDeInit( );
 #elif defined( LR1110MB1XXS )

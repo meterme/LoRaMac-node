@@ -41,7 +41,7 @@ extern "C"
 /*!
  * Defines the time required for the TCXO to wakeup [ms].
  */
-#if defined( SX1262MBXDAS )
+#if defined( SX1262MBXDAS ) || defined( E22_900M30S )
 #define BOARD_TCXO_WAKEUP_TIME                      5
 #else
 #define BOARD_TCXO_WAKEUP_TIME                      0

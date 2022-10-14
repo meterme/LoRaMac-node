@@ -157,6 +157,8 @@ processGpsChar(uint8_t c)
 
 }
 
+uint8_t gBuff[1024];
+uint16_t gIndex;
 
 void
 ProcessGps( Uart_t* uart )
@@ -164,6 +166,10 @@ ProcessGps( Uart_t* uart )
     uint8_t data;
     
     if( UartGetChar( uart, &data ) == 0 ) {
+        gBuff[gIndex++] = data;
+        if (gIndex >= sizeof (gBuff)) {
+            gIndex = 0;
+        }
         processGpsChar( data );
     }
 }
