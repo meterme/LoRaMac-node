@@ -360,14 +360,25 @@ void RegionUS915InitDefaults( InitDefaultsParams_t* params )
                 RegionNvmGroup2->Channels[i].Band = 0;
             }
 
+// XXX: make this a cmake option
+#define US915_SB2
+
             // Default ChannelsMask
+#ifdef  US915_SB2
+            RegionNvmGroup2->ChannelsDefaultMask[0] = 0xFF00;
+            RegionNvmGroup2->ChannelsDefaultMask[1] = 0x0000;
+            RegionNvmGroup2->ChannelsDefaultMask[2] = 0x0000;
+            RegionNvmGroup2->ChannelsDefaultMask[3] = 0x0000;
+            RegionNvmGroup2->ChannelsDefaultMask[4] = 0x0002;
+            RegionNvmGroup2->ChannelsDefaultMask[5] = 0x0000;
+#else
             RegionNvmGroup2->ChannelsDefaultMask[0] = 0xFFFF;
             RegionNvmGroup2->ChannelsDefaultMask[1] = 0xFFFF;
             RegionNvmGroup2->ChannelsDefaultMask[2] = 0xFFFF;
             RegionNvmGroup2->ChannelsDefaultMask[3] = 0xFFFF;
             RegionNvmGroup2->ChannelsDefaultMask[4] = 0x00FF;
             RegionNvmGroup2->ChannelsDefaultMask[5] = 0x0000;
-
+#endif
             // Copy channels default mask
             RegionCommonChanMaskCopy( RegionNvmGroup2->ChannelsMask, RegionNvmGroup2->ChannelsDefaultMask, CHANNELS_MASK_SIZE );
 

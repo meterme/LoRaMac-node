@@ -30,6 +30,7 @@
 #include "uart.h"
 #include "RegionCommon.h"
 
+#include "gps.h"
 #include "cli.h"
 #include "Commissioning.h"
 #include "LmHandler.h"
@@ -39,9 +40,9 @@
 
 #ifndef ACTIVE_REGION
 
-#warning "No active region defined, LORAMAC_REGION_EU868 will be used as default."
+#warning "No active region defined, LORAMAC_REGION_US915 will be used as default."
 
-#define ACTIVE_REGION LORAMAC_REGION_EU868
+#define ACTIVE_REGION LORAMAC_REGION_EU915
 
 #endif
 
@@ -55,7 +56,7 @@
 /*!
  * Defines the application data transmission duty cycle. 5s, value in [ms].
  */
-#define APP_TX_DUTYCYCLE                            5000
+#define APP_TX_DUTYCYCLE                            60000
 
 /*!
  * Defines a random delay for application data transmission duty cycle. 1s,
@@ -68,14 +69,14 @@
  *
  * \remark Please note that when ADR is enabled the end-device should be static
  */
-#define LORAWAN_ADR_STATE                           LORAMAC_HANDLER_ADR_ON
+#define LORAWAN_ADR_STATE                           LORAMAC_HANDLER_ADR_OFF
 
 /*!
  * Default datarate
  *
  * \remark Please note that LORAWAN_DEFAULT_DATARATE is used only when ADR is disabled 
  */
-#define LORAWAN_DEFAULT_DATARATE                    DR_0
+#define LORAWAN_DEFAULT_DATARATE                    DR_1
 
 /*!
  * LoRaWAN confirmed messages
@@ -92,7 +93,7 @@
  *
  * \remark Please note that ETSI mandates duty cycled transmissions. Use only for test purposes
  */
-#define LORAWAN_DUTYCYCLE_ON                        true
+#define LORAWAN_DUTYCYCLE_ON                        false
 
 /*!
  * LoRaWAN application port
@@ -119,8 +120,8 @@ static uint8_t AppDataBuffer[LORAWAN_APP_DATA_BUFFER_MAX_SIZE];
  */
 static LmHandlerAppData_t AppData =
 {
-    .Buffer = AppDataBuffer,
-    .BufferSize = 0,
+    .Buffer = coords,
+    .BufferSize = 18,
     .Port = 0,
 };
 
@@ -220,7 +221,7 @@ static LmHandlerParams_t LmHandlerParams =
     .DutyCycleEnabled = LORAWAN_DUTYCYCLE_ON,
     .DataBufferMaxSize = LORAWAN_APP_DATA_BUFFER_MAX_SIZE,
     .DataBuffer = AppDataBuffer,
-    .PingSlotPeriodicity = REGION_COMMON_DEFAULT_PING_SLOT_PERIODICITY,
+    .PingSlotPeriodicity = REGION_COMMON_DEFAULT_PING_SLOT_PERIODICITY
 };
 
 static LmhpComplianceParams_t LmhpComplianceParams =
@@ -245,13 +246,13 @@ static volatile uint32_t TxPeriodicity = 0;
 /*!
  * LED GPIO pins objects
  */
-extern Gpio_t Led1; // Tx
-extern Gpio_t Led2; // Rx
+// extern Gpio_t Led1; // Tx
+// extern Gpio_t Led2; // Rx
 
 /*!
  * UART object used for command line interface handling
  */
-extern Uart_t Uart2;
+extern Uart_t Uart1, Uart2;
 
 /*!
  * Main application entry point.
@@ -304,6 +305,9 @@ int main( void )
         // Process characters sent over the command line interface
         CliProcess( &Uart2 );
 
+        // Process GPS receiver
+        ProcessGps( &Uart1 );
+
         // Processes the LoRaMac events
         LmHandlerProcess( );
 
@@ -318,8 +322,11 @@ int main( void )
         }
         else
         {
-            // The MCU wakes up through events
-            BoardLowPowerHandler( );
+            // XXX: Don't sleep if operating as a tracker
+            if (0) {
+                // The MCU wakes up through events
+                BoardLowPowerHandler( );
+            }
         }
         CRITICAL_SECTION_END( );
     }
@@ -385,7 +392,7 @@ static void OnRxData( LmHandlerAppData_t* appData, LmHandlerRxParams_t* params )
     }
 
     // Switch LED 2 ON for each received downlink
-    GpioWrite( &Led2, 1 );
+//    GpioWrite( &Led2, 1 );
     TimerStart( &Led2Timer );
 }
 
@@ -398,7 +405,7 @@ static void OnClassChange( DeviceClass_t deviceClass )
     {
         .Buffer = NULL,
         .BufferSize = 0,
-        .Port = 0,
+        .Port = 0
     };
     LmHandlerSend( &appData, LORAMAC_HANDLER_UNCONFIRMED_MSG );
 }
@@ -448,23 +455,19 @@ static void PrepareTxFrame( void )
     {
         return;
     }
-
-    uint8_t channel = 0;
+    
+    // no valid report ready
+    if ( *((uint32_t *) &coords) == 0xffffffff ) {
+        return;
+    }
 
     AppData.Port = LORAWAN_APP_PORT;
-
-    CayenneLppReset( );
-    CayenneLppAddDigitalInput( channel++, AppLedStateOn );
-    CayenneLppAddAnalogInput( channel++, BoardGetBatteryLevel( ) * 100 / 254 );
-
-    CayenneLppCopy( AppData.Buffer );
-    AppData.BufferSize = CayenneLppGetSize( );
 
     if( LmHandlerSend( &AppData, LmHandlerParams.IsTxConfirmed ) == LORAMAC_HANDLER_SUCCESS )
     {
         // Switch LED 1 ON
-        GpioWrite( &Led1, 1 );
-        TimerStart( &Led1Timer );
+//        GpioWrite( &Led1, 1 );
+//        TimerStart( &Led1Timer );
     }
 }
 
@@ -548,7 +551,7 @@ static void OnLed1TimerEvent( void* context )
 {
     TimerStop( &Led1Timer );
     // Switch LED 1 OFF
-    GpioWrite( &Led1, 0 );
+//    GpioWrite( &Led1, 0 );
 }
 
 /*!
@@ -558,7 +561,7 @@ static void OnLed2TimerEvent( void* context )
 {
     TimerStop( &Led2Timer );
     // Switch LED 2 OFF
-    GpioWrite( &Led2, 0 );
+//    GpioWrite( &Led2, 0 );
 }
 
 /*!
@@ -566,7 +569,7 @@ static void OnLed2TimerEvent( void* context )
  */
 static void OnLedBeaconTimerEvent( void* context )
 {
-    GpioWrite( &Led2, 1 );
+//    GpioWrite( &Led2, 1 );
     TimerStart( &Led2Timer );
 
     TimerStart( &LedBeaconTimer );

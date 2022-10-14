@@ -382,24 +382,6 @@ $ make
   * ping-pong.bin - binary format
   * ping-pong.hex - hex format
 
-### Serial console NVM management
-
-The `periodic-uplink-lpp` and `fuota-test-01` examples allow to reset the NVM storage through the serial interface.
-
-In order to reset the NVM contents one must hit `ESC` + `N` keyboard keys on a serial terminal.
-
-The serial terminal will show the following after `ESC` + `N` keyboard keys are hit. After reseting the end-device the clean NVM will be used.
-
-```text
-ESC + N
-
-
-NVM factory reset succeed
-
-
-PLEASE RESET THE END-DEVICE
-```
-
 ## Acknowledgments
 
 * The mbed (https://mbed.org/) project was used at the beginning as source of

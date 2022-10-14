@@ -62,13 +62,8 @@ extern "C"
 #define RADIO_BUSY                                  PB_3
 #define RADIO_DIO_1                                 PB_4
 
-#define RADIO_ANT_SWITCH_POWER                      PA_9
-#define RADIO_FREQ_SEL                              PA_1
-#define RADIO_XTAL_SEL                              PB_0
-#define RADIO_DEVICE_SEL                            PA_4
-
-#define LED_1                                       PC_1
-#define LED_2                                       PC_0
+#define RADIO_RXEN                                  PC_0
+#define RADIO_TXEN                                  PC_1
 
 // Debug pins definition.
 #define RADIO_DBG_PIN_TX                            PB_6
@@ -121,8 +116,11 @@ extern "C"
 #define I2C_SCL                                     PB_8
 #define I2C_SDA                                     PB_9
 
-#define UART_TX                                     PA_2
-#define UART_RX                                     PA_3
+#define UART2_TX                                     PA_2
+#define UART2_RX                                     PA_3
+
+#define UART1_TX                                     PA_9
+#define UART1_RX                                     PA_10
 
 #ifdef __cplusplus
 }
