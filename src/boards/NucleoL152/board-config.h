@@ -116,11 +116,17 @@ extern "C"
 #define I2C_SCL                                     PB_8
 #define I2C_SDA                                     PB_9
 
+/*
+ * UART1: GPS (PA9/PA10)
+ * UART2: Console (via STLINK)
+ * UART3: N/C
+ */
+#define UART1_TX                                     PA_9
+#define UART1_RX                                     PA_10
+
 #define UART2_TX                                     PA_2
 #define UART2_RX                                     PA_3
 
-#define UART1_TX                                     PA_9
-#define UART1_RX                                     PA_10
 
 #ifdef __cplusplus
 }

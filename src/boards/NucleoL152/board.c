@@ -61,8 +61,8 @@
  * MCU objects
  */
 Adc_t  Adc;
-Uart_t Uart1;
-Uart_t Uart2;
+Uart_t ConsoleUart;
+Uart_t GpsUart;
 
 #if defined( LR1110MB1XXS )
     extern lr1110_t LR1110;
@@ -136,19 +136,19 @@ void BoardInitMcu( void )
 
         SystemClockConfig( );
 
-        UsbIsConnected = true;
+        // UsbIsConnected = true;
 
-        FifoInit( &Uart2.FifoTx, Uart2TxBuffer, UART2_FIFO_TX_SIZE );
-        FifoInit( &Uart2.FifoRx, Uart2RxBuffer, UART2_FIFO_RX_SIZE );
+        FifoInit( &ConsoleUart.FifoTx, Uart2TxBuffer, UART2_FIFO_TX_SIZE );
+        FifoInit( &ConsoleUart.FifoRx, Uart2RxBuffer, UART2_FIFO_RX_SIZE );
         // Configure your terminal for 8 Bits data (7 data bit + 1 parity bit), no parity and no flow ctrl
-        UartInit( &Uart2, UART_2, UART2_TX, UART2_RX );
-        UartConfig( &Uart2, RX_TX, 921600, UART_8_BIT, UART_1_STOP_BIT, NO_PARITY, NO_FLOW_CTRL );
+        UartInit( &ConsoleUart, UART_2, UART2_TX, UART2_RX );
+        UartConfig( &ConsoleUart, RX_TX, 921600, UART_8_BIT, UART_1_STOP_BIT, NO_PARITY, NO_FLOW_CTRL );
 
-        FifoInit( &Uart1.FifoTx, Uart1TxBuffer, UART1_FIFO_TX_SIZE );
-        FifoInit( &Uart1.FifoRx, Uart1RxBuffer, UART1_FIFO_RX_SIZE );
+        FifoInit( &GpsUart.FifoTx, Uart1TxBuffer, UART1_FIFO_TX_SIZE );
+        FifoInit( &GpsUart.FifoRx, Uart1RxBuffer, UART1_FIFO_RX_SIZE );
         // Configure your terminal for 8 Bits data (7 data bit + 1 parity bit), no parity and no flow ctrl
-        UartInit( &Uart1, UART_1, UART1_TX, UART1_RX );
-        UartConfig( &Uart1, RX_TX, 9600, UART_8_BIT, UART_1_STOP_BIT, NO_PARITY, NO_FLOW_CTRL );
+        UartInit( &GpsUart, UART_1, UART1_TX, UART1_RX );
+        UartConfig( &GpsUart, RX_TX, 9600, UART_8_BIT, UART_1_STOP_BIT, NO_PARITY, NO_FLOW_CTRL );
 
         RtcInit( );
 
@@ -526,7 +526,7 @@ void BoardLowPowerHandler( void )
  */
 int _write( int fd, const void *buf, size_t count )
 {
-    while( UartPutBuffer( &Uart2, ( uint8_t* )buf, ( uint16_t )count ) != 0 ){ };
+    while( UartPutBuffer( &ConsoleUart, ( uint8_t* )buf, ( uint16_t )count ) != 0 ){ };
     return count;
 }
 
@@ -536,9 +536,9 @@ int _write( int fd, const void *buf, size_t count )
 int _read( int fd, const void *buf, size_t count )
 {
     size_t bytesRead = 0;
-    while( UartGetBuffer( &Uart2, ( uint8_t* )buf, count, ( uint16_t* )&bytesRead ) != 0 ){ };
+    while( UartGetBuffer( &ConsoleUart, ( uint8_t* )buf, count, ( uint16_t* )&bytesRead ) != 0 ){ };
     // Echo back the character
-    while( UartPutBuffer( &Uart2, ( uint8_t* )buf, ( uint16_t )bytesRead ) != 0 ){ };
+    while( UartPutBuffer( &ConsoleUart, ( uint8_t* )buf, ( uint16_t )bytesRead ) != 0 ){ };
     return bytesRead;
 }
 

@@ -252,7 +252,7 @@ static volatile uint32_t TxPeriodicity = 0;
 /*!
  * UART object used for command line interface handling
  */
-extern Uart_t Uart1, Uart2;
+extern Uart_t ConsoleUart, GpsUart;
 
 /*!
  * Main application entry point.
@@ -303,10 +303,10 @@ int main( void )
     while( 1 )
     {
         // Process characters sent over the command line interface
-        CliProcess( &Uart2 );
+        CliProcess( &ConsoleUart );
 
         // Process GPS receiver
-        ProcessGps( &Uart1 );
+        ProcessGps( &GpsUart );
 
         // Processes the LoRaMac events
         LmHandlerProcess( );
