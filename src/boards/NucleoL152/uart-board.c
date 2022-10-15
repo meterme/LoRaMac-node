@@ -371,19 +371,6 @@ HAL_UART_ErrorCallback(UART_HandleTypeDef *handle)
 void
 USART1_IRQHandler(void)
 {
-    // [BEGIN] Workaround to solve an issue with the HAL drivers not managin the uart state correctly.
-    uint32_t tmpFlag, tmpItSource;
-
-    tmpFlag = __HAL_UART_GET_FLAG(&UartContext[UART_1].UartHandle, UART_FLAG_TC);
-    tmpItSource = __HAL_UART_GET_IT_SOURCE(&UartContext[UART_1].UartHandle, UART_IT_TC);
-    // UART in mode Transmitter end
-    if ((tmpFlag != RESET) && (tmpItSource != RESET)) {
-        if ((UartContext[UART_1].UartHandle.State == HAL_UART_STATE_BUSY_RX) ||
-          UartContext[UART_1].UartHandle.State == HAL_UART_STATE_BUSY_TX_RX) {
-            UartContext[UART_1].UartHandle.State = HAL_UART_STATE_BUSY_TX_RX;
-        }
-    }
-    // [BEGIN] Workaround to solve an issue with the HAL drivers not managin the uart state correctly.
 
     HAL_UART_IRQHandler(&UartContext[UART_1].UartHandle);
 }
@@ -391,19 +378,6 @@ USART1_IRQHandler(void)
 void
 USART2_IRQHandler(void)
 {
-    // [BEGIN] Workaround to solve an issue with the HAL drivers not managin the uart state correctly.
-    uint32_t tmpFlag = 0, tmpItSource = 0;
-
-    tmpFlag = __HAL_UART_GET_FLAG(&UartContext[UART_2].UartHandle, UART_FLAG_TC);
-    tmpItSource = __HAL_UART_GET_IT_SOURCE(&UartContext[UART_2].UartHandle, UART_IT_TC);
-    // UART in mode Transmitter end
-    if ((tmpFlag != RESET) && (tmpItSource != RESET))    {
-        if ((UartContext[UART_2].UartHandle.State == HAL_UART_STATE_BUSY_RX) || UartContext[UART_2].UartHandle.State == HAL_UART_STATE_BUSY_TX_RX)
-        {
-            UartContext[UART_2].UartHandle.State = HAL_UART_STATE_BUSY_TX_RX;
-        }
-    }
-    // [END] Workaround to solve an issue with the HAL drivers not managin the uart state correctly.
 
     HAL_UART_IRQHandler(&UartContext[UART_2].UartHandle);
 }

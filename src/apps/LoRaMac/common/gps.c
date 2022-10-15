@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#if 0
+
 #include "gps.h"
 
 #include <stdlib.h>
@@ -173,3 +175,4 @@ ProcessGps( Uart_t* uart )
         processGpsChar( data );
     }
 }
+#endif

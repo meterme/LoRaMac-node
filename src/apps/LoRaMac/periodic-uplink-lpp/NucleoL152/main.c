@@ -29,8 +29,8 @@
 #include "gpio.h"
 #include "uart.h"
 #include "RegionCommon.h"
-
 #include "gps.h"
+
 #include "cli.h"
 #include "Commissioning.h"
 #include "LmHandler.h"
@@ -56,13 +56,13 @@
 /*!
  * Defines the application data transmission duty cycle. 5s, value in [ms].
  */
-#define APP_TX_DUTYCYCLE                            60000
+#define APP_TX_DUTYCYCLE                            (2 * 60 * 1000UL)
 
 /*!
  * Defines a random delay for application data transmission duty cycle. 1s,
  * value in [ms].
  */
-#define APP_TX_DUTYCYCLE_RND                        1000
+#define APP_TX_DUTYCYCLE_RND                        5000
 
 /*!
  * LoRaWAN Adaptive Data Rate
@@ -76,7 +76,7 @@
  *
  * \remark Please note that LORAWAN_DEFAULT_DATARATE is used only when ADR is disabled 
  */
-#define LORAWAN_DEFAULT_DATARATE                    DR_1
+#define LORAWAN_DEFAULT_DATARATE                    DR_2
 
 /*!
  * LoRaWAN confirmed messages
@@ -99,7 +99,7 @@
  * LoRaWAN application port
  * @remark The allowed port range is from 1 up to 223. Other values are reserved.
  */
-#define LORAWAN_APP_PORT                            2
+#define LORAWAN_APP_PORT                            3
 
 /*!
  *
@@ -120,9 +120,9 @@ static uint8_t AppDataBuffer[LORAWAN_APP_DATA_BUFFER_MAX_SIZE];
  */
 static LmHandlerAppData_t AppData =
 {
-    .Buffer = coords,
-    .BufferSize = 18,
-    .Port = 0,
+    .Buffer = AppDataBuffer,
+    .BufferSize = 0,
+    .Port = 0
 };
 
 /*!
@@ -243,6 +243,8 @@ static volatile uint8_t IsTxFramePending = 0;
 
 static volatile uint32_t TxPeriodicity = 0;
 
+volatile uint8_t gpsReportPending = 0;
+
 /*!
  * LED GPIO pins objects
  */
@@ -266,7 +268,7 @@ int main( void )
     TimerSetValue( &Led1Timer, 25 );
 
     TimerInit( &Led2Timer, OnLed2TimerEvent );
-    TimerSetValue( &Led2Timer, 25 );
+    TimerSetValue( &Led2Timer, 250 );
 
     TimerInit( &LedBeaconTimer, OnLedBeaconTimerEvent );
     TimerSetValue( &LedBeaconTimer, 5000 );
@@ -306,7 +308,7 @@ int main( void )
         CliProcess( &ConsoleUart );
 
         // Process GPS receiver
-        ProcessGps( &GpsUart );
+        // ProcessGps( &GpsUart );
 
         // Processes the LoRaMac events
         LmHandlerProcess( );
@@ -322,11 +324,8 @@ int main( void )
         }
         else
         {
-            // XXX: Don't sleep if operating as a tracker
-            if (0) {
-                // The MCU wakes up through events
-                BoardLowPowerHandler( );
-            }
+            // The MCU wakes up through events
+            if (0) BoardLowPowerHandler( );
         }
         CRITICAL_SECTION_END( );
     }
@@ -367,6 +366,7 @@ static void OnJoinRequest( LmHandlerJoinParams_t* params )
     else
     {
         LmHandlerRequestClass( LORAWAN_DEFAULT_CLASS );
+        IsTxFramePending = 1;
     }
 }
 
@@ -446,22 +446,35 @@ static void OnSysTimeUpdate( void )
 }
 #endif
 
+/*
+ *
+ */
+extern uint8_t coords[];
+
 /*!
  * Prepares the payload of the frame and transmits it.
  */
 static void PrepareTxFrame( void )
 {
-    if( LmHandlerIsBusy( ) == true )
-    {
+
+    if (0xffffffffffffffffULL == *((uint64_t *)(coords + 0))) {
+        // Reset heartbeat transmission
+        TimerSetValue( &TxTimer, 10000 );
+        TimerStart( &TxTimer );
         return;
     }
-    
-    // no valid report ready
-    if ( *((uint32_t *) &coords) == 0xffffffff ) {
+
+    if( LmHandlerIsBusy( ) == true )
+    {
+        // XXX: set IsTxPending to retry
+        TimerSetValue( &TxTimer, 10000 );
+        TimerStart( &TxTimer );
         return;
     }
 
     AppData.Port = LORAWAN_APP_PORT;
+    AppData.Buffer = coords;
+    AppData.BufferSize = 18;
 
     if( LmHandlerSend( &AppData, LmHandlerParams.IsTxConfirmed ) == LORAMAC_HANDLER_SUCCESS )
     {
@@ -482,6 +495,7 @@ static void StartTxProcess( LmHandlerTxEvents_t txEvent )
             // Schedule 1st packet transmission
             TimerInit( &TxTimer, OnTxTimerEvent );
             TimerSetValue( &TxTimer, TxPeriodicity );
+            TimerStart(&TxTimer);
             OnTxTimerEvent( NULL );
         }
         break;
@@ -496,8 +510,8 @@ static void UplinkProcess( void )
 {
     uint8_t isPending = 0;
     CRITICAL_SECTION_BEGIN( );
-    isPending = IsTxFramePending;
-    IsTxFramePending = 0;
+    isPending = IsTxFramePending || gpsReportPending;
+    gpsReportPending = IsTxFramePending = 0;
     CRITICAL_SECTION_END( );
     if( isPending == 1 )
     {
