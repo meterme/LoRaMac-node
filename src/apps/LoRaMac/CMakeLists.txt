@@ -57,7 +57,6 @@ if(SUB_PROJECT STREQUAL periodic-uplink-lpp)
     list(APPEND ${PROJECT_NAME}_COMMON
         "${CMAKE_CURRENT_LIST_DIR}/common/CayenneLpp.c"
         "${CMAKE_CURRENT_LIST_DIR}/common/cli.c"
-        "${CMAKE_CURRENT_LIST_DIR}/common/gps.c"
         "${CMAKE_CURRENT_LIST_DIR}/common/LmHandlerMsgDisplay.c"
         "${CMAKE_CURRENT_LIST_DIR}/common/NvmDataMgmt.c"
     )
