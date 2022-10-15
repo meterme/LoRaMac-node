@@ -1,3 +1,4 @@
+# RAK5205, L152-E22_900M30S
 # LoRaWAN end-device stack implementation and example projects
 
       ______                              _
