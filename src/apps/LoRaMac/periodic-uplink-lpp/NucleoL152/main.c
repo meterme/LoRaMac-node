@@ -56,7 +56,7 @@
 /*!
  * Defines the application data transmission duty cycle. 5s, value in [ms].
  */
-#define APP_TX_DUTYCYCLE                            (2 * 60 * 1000UL)
+#define APP_TX_DUTYCYCLE                            (15 * 60 * 1000UL)
 
 /*!
  * Defines a random delay for application data transmission duty cycle. 1s,
