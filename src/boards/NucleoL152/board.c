@@ -57,8 +57,10 @@
 /*!
  * LED GPIO pins objects
  */
-// Gpio_t Led1;
-// Gpio_t Led2;
+#if !defined (E22_900M30S)
+Gpio_t Led1;
+Gpio_t Led2;
+#endif
 
 /*
  * MCU objects
@@ -134,12 +136,16 @@ void BoardInitMcu( void )
         HAL_Init( );
 
         // LEDs
-//        GpioInit( &Led1, LED_1, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
-//        GpioInit( &Led2, LED_2, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
+#if !defined (E22_900M30S)
+        GpioInit( &Led1, LED_1, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
+        GpioInit( &Led2, LED_2, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
+#endif
 
         SystemClockConfig( );
 
-        // UsbIsConnected = true;
+#if !defined (E22_900M30S)
+        UsbIsConnected = true;
+#endif
 
         FifoInit( &ConsoleUart.FifoTx, Uart2TxBuffer, UART2_FIFO_TX_SIZE );
         FifoInit( &ConsoleUart.FifoRx, Uart2RxBuffer, UART2_FIFO_RX_SIZE );
@@ -147,13 +153,14 @@ void BoardInitMcu( void )
         UartInit( &ConsoleUart, UART_2, UART2_TX, UART2_RX );
         UartConfig( &ConsoleUart, RX_TX, 921600, UART_8_BIT, UART_1_STOP_BIT, NO_PARITY, NO_FLOW_CTRL );
 
+#if defined (E22_900M30S)
         FifoInit( &GpsUart.FifoTx, Uart1TxBuffer, UART1_FIFO_TX_SIZE );
         FifoInit( &GpsUart.FifoRx, Uart1RxBuffer, UART1_FIFO_RX_SIZE );
         // Configure your terminal for 8 Bits data (7 data bit + 1 parity bit), no parity and no flow ctrl
         GpsUart.IrqNotify = GpsMcuIrqNotify;
         UartInit( &GpsUart, UART_1, UART1_TX, UART1_RX );
         UartConfig( &GpsUart, RX_TX, 9600, UART_8_BIT, UART_1_STOP_BIT, NO_PARITY, NO_FLOW_CTRL );
-
+#endif
         RtcInit( );
 
         BoardUnusedIoInit( );

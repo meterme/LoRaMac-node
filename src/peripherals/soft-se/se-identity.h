@@ -71,11 +71,20 @@ extern "C" {
 /*!
  * end-device IEEE EUI (big endian)
  */
-#define LORAWAN_DEVICE_EUI                                 { 0xA8, 0x40, 0x41, 0x8B, 0xF1, 0x82, 0xF8, 0x03 }
+// RAK5205
+#define LORAWAN_DEVICE_EUI                                 { 0x60, 0xC5, 0xA8, 0xFF, 0xFE, 0x6d, 0x01, 0x74 }
+
+// E22_900M30S
+// #define LORAWAN_DEVICE_EUI                                 { 0xA8, 0x40, 0x41, 0x8B, 0xF1, 0x82, 0xF8, 0x03 }
+
 /*!
  * App/Join server IEEE EUI (big endian)
  */
-#define LORAWAN_JOIN_EUI                                   { 0xa0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x02 }
+// RAK5205
+#define LORAWAN_JOIN_EUI                                   { 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11 }
+
+// E22_900M30S)
+// #define LORAWAN_JOIN_EUI                                   { 0xa0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x02 }
 
 /*!
  * Secure-element pin
@@ -94,6 +103,12 @@ extern "C" {
  */
 #define LORAWAN_DEVICE_ADDRESS                             ( uint32_t )0x00000000
 
+// RAK5205
+#define	LOCAL_NWK_KEY	 { 0x66, 0xb0, 0xd8, 0x80, 0xff, 0x8d, 0x92, 0x5f, 0x17, 0x47, 0x6c, 0x25, 0xba, 0xc5, 0x82, 0x68 }
+
+// E22_900M30S)
+//#define	LOCAL_NWK_KEY { 0xAD, 0x63, 0x59, 0x61, 0x15, 0x69, 0x7A, 0x26, 0x95, 0x87, 0x8E, 0x6B, 0x6F, 0x6F, 0xFB, 0x77 }
+
 #define SOFT_SE_KEY_LIST                                                                                            \
     {                                                                                                               \
         {                                                                                                           \
@@ -111,8 +126,7 @@ extern "C" {
              * WARNING: FOR 1.0.x DEVICES IT IS THE \ref LORAWAN_APP_KEY                                            \
              */                                                                                                     \
             .KeyID    = NWK_KEY,                                                                                    \
-            .KeyValue = { 0xAD, 0x63, 0x59, 0x61, 0x15, 0x69, 0x7A, 0x26, 0x95, 0x87, 0x8E, 0x6B, 0x6F, 0x6F, 0xFB, \
-                        0x77 },                                                                                     \
+            .KeyValue = LOCAL_NWK_KEY,                                                                              \
         },                                                                                                          \
         {                                                                                                           \
             /*!                                                                                                     \

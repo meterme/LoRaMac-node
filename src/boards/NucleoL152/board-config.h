@@ -62,8 +62,18 @@ extern "C"
 #define RADIO_BUSY                                  PB_3
 #define RADIO_DIO_1                                 PB_4
 
+#if defined (E22_900M30S)
 #define RADIO_RXEN                                  PC_0
 #define RADIO_TXEN                                  PC_1
+#else
+#define RADIO_ANT_SWITCH_POWER                      PA_9
+#define RADIO_FREQ_SEL                              PA_1
+#define RADIO_XTAL_SEL                              PB_0
+#define RADIO_DEVICE_SEL                            PA_4
+
+#define LED_1                                       PC_1
+#define LED_2                                       PC_0
+#endif
 
 // Debug pins definition.
 #define RADIO_DBG_PIN_TX                            PB_6

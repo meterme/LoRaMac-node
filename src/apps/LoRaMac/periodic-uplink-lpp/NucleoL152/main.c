@@ -99,7 +99,7 @@
  * LoRaWAN application port
  * @remark The allowed port range is from 1 up to 223. Other values are reserved.
  */
-#define LORAWAN_APP_PORT                            3
+#define LORAWAN_APP_PORT                            2
 
 /*!
  *
@@ -122,7 +122,7 @@ static LmHandlerAppData_t AppData =
 {
     .Buffer = AppDataBuffer,
     .BufferSize = 0,
-    .Port = 0
+    .Port = 0,
 };
 
 /*!
@@ -221,7 +221,7 @@ static LmHandlerParams_t LmHandlerParams =
     .DutyCycleEnabled = LORAWAN_DUTYCYCLE_ON,
     .DataBufferMaxSize = LORAWAN_APP_DATA_BUFFER_MAX_SIZE,
     .DataBuffer = AppDataBuffer,
-    .PingSlotPeriodicity = REGION_COMMON_DEFAULT_PING_SLOT_PERIODICITY
+    .PingSlotPeriodicity = REGION_COMMON_DEFAULT_PING_SLOT_PERIODICITY,
 };
 
 static LmhpComplianceParams_t LmhpComplianceParams =
@@ -306,9 +306,6 @@ int main( void )
     {
         // Process characters sent over the command line interface
         CliProcess( &ConsoleUart );
-
-        // Process GPS receiver
-        // ProcessGps( &GpsUart );
 
         // Processes the LoRaMac events
         LmHandlerProcess( );
@@ -405,7 +402,7 @@ static void OnClassChange( DeviceClass_t deviceClass )
     {
         .Buffer = NULL,
         .BufferSize = 0,
-        .Port = 0
+        .Port = 0,
     };
     LmHandlerSend( &appData, LORAMAC_HANDLER_UNCONFIRMED_MSG );
 }
