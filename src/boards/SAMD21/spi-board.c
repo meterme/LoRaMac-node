@@ -32,6 +32,10 @@
 
 struct spi_m_sync_descriptor Spi0;
 
+/*
+ * XXX: Hard-coded to initialize SPI0 using hard-coded defaults that are better left generated
+ * by Atmel START
+ */
 void SpiInit( Spi_t *obj, SpiId_t spiId, PinNames mosi, PinNames miso, PinNames sclk, PinNames nss )
 {
     // clock init

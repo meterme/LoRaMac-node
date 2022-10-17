@@ -410,7 +410,7 @@
 // <i> Indicates whether configuration for DFLL is enabled or not
 // <id> enable_dfll48m
 #ifndef CONF_DFLL_CONFIG
-#define CONF_DFLL_CONFIG 0
+#define CONF_DFLL_CONFIG 1
 #endif
 
 // <y> Reference Clock Source
@@ -425,7 +425,7 @@
 // <i> Select the clock source.
 // <id> dfll48m_ref_clock
 #ifndef CONF_DFLL_GCLK
-#define CONF_DFLL_GCLK GCLK_CLKCTRL_GEN_GCLK3_Val
+#define CONF_DFLL_GCLK GCLK_CLKCTRL_GEN_GCLK1_Val
 #endif
 
 // <h> DFLL Control
@@ -433,7 +433,7 @@
 // <i> Indicates whether DFLL is enabled or not
 // <id> dfll48m_arch_enable
 #ifndef CONF_DFLL_ENABLE
-#define CONF_DFLL_ENABLE 0
+#define CONF_DFLL_ENABLE 1
 #endif
 
 // <q> Wait Lock
@@ -470,7 +470,7 @@
 // <i> If this bit is 1: the DFLL will only be running when requested by a peripheral.
 // <id> dfll48m_arch_ondemand
 #ifndef CONF_DFLL_ONDEMAND
-#define CONF_DFLL_ONDEMAND 1
+#define CONF_DFLL_ONDEMAND 0
 #endif
 
 // <q> Run In Standby
@@ -520,19 +520,19 @@
 // <i> Mode
 // <id> dfll48m_mode
 #ifndef CONF_DFLL_MODE
-#define CONF_DFLL_MODE CONF_DFLL_OPEN_LOOP_MODE
+#define CONF_DFLL_MODE CONF_DFLL_CLOSED_LOOP_MODE
 #endif
 
 // <o> Coarse Maximum Step <0x0-0x1F>
 // <id> dfll_arch_cstep
 #ifndef CONF_DFLL_CSTEP
-#define CONF_DFLL_CSTEP 1
+#define CONF_DFLL_CSTEP 7
 #endif
 
 // <o> Fine Maximum Step <0x0-0x3FF>
 // <id> dfll_arch_fstep
 #ifndef CONF_DFLL_FSTEP
-#define CONF_DFLL_FSTEP 1
+#define CONF_DFLL_FSTEP 63
 #endif
 
 //  <o>DFLL Multiply Factor<0-65535>
@@ -540,7 +540,7 @@
 //  <i> Default: 0
 //  <id> dfll48m_mul
 #ifndef CONF_DFLL_MUL
-#define CONF_DFLL_MUL 0
+#define CONF_DFLL_MUL 1465
 #endif
 
 // <e> DFLL Calibration Overwrite
@@ -618,7 +618,7 @@
 // <i> If this bit is 1: the DFLL will only be running when requested by a peripheral.
 // <id> fdpll96m_arch_ondemand
 #ifndef CONF_DPLL_ONDEMAND
-#define CONF_DPLL_ONDEMAND 1
+#define CONF_DPLL_ONDEMAND 0
 #endif
 
 // <q> Run In Standby
@@ -634,7 +634,7 @@
 // <i> Indicates whether DPLL is enabled or not
 // <id> fdpll96m_arch_enable
 #ifndef CONF_DPLL_ENABLE
-#define CONF_DPLL_ENABLE 1
+#define CONF_DPLL_ENABLE 0
 #endif
 
 // <q> Lock ByPass
@@ -655,14 +655,14 @@
 // <i> Set the  fractional part of the frequency multiplier.
 // <id> fdpll96m_ldrfrac
 #ifndef CONF_DPLL_LDRFRAC
-#define CONF_DPLL_LDRFRAC 7
+#define CONF_DPLL_LDRFRAC 13
 #endif
 
 // <o>DPLL LDR <0-4095>
 // <i> Set the  integer part of the frequency multiplier.
 // <id> fdpll96m_ldr
 #ifndef CONF_DPLL_LDR
-#define CONF_DPLL_LDR 731
+#define CONF_DPLL_LDR 1463
 #endif
 
 // </h>

@@ -34,11 +34,13 @@ list(APPEND ${PROJECT_NAME}_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/sx1276-board.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/uart-board.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/i2c-board.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/usb-board.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/utilities.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hw_timer.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/samd21a/gcc/gcc/startup_samd21.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/samd21a/gcc/system_samd21.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hal/src/hal_atomic.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hal/src/hal_adc_sync.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hal/src/hal_delay.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hal/src/hal_ext_irq.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hal/src/hal_gpio.c"
@@ -48,6 +50,7 @@ list(APPEND ${PROJECT_NAME}_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hal/src/hal_sleep.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hal/src/hal_spi_m_sync.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hal/src/hal_timer.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hal/src/hal_usb_device.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hal/utils/src/utils_assert.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hal/utils/src/utils_event.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hal/utils/src/utils_list.c"
@@ -63,6 +66,10 @@ list(APPEND ${PROJECT_NAME}_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hpl/sysctrl/hpl_sysctrl.c" 
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hpl/usart/usart_lite.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hpl/spi/spi_lite.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hpl/usb/hpl_usb.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/usb/usb_protocol.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/usb/class/cdc/device/cdcdf_acm.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/usb/device/usbdc.c"
 )
 
 add_library(${PROJECT_NAME} OBJECT EXCLUDE_FROM_ALL ${${PROJECT_NAME}_SOURCES})
@@ -97,11 +104,16 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hpl/sysctrl
     ${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hpl/usart
     ${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hpl/spi
+    ${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hpl/usb
     ${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/hri
     ${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/samd21a/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/samd21a/include/component
     ${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/samd21a/include/instance
     ${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/samd21a/include/pio
+    ${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/usb/class/cdc/device
+    ${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/usb/class/cdc
+    ${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/usb/device
+    ${CMAKE_CURRENT_SOURCE_DIR}/../mcu/samd21/usb
     $<TARGET_PROPERTY:board,INTERFACE_INCLUDE_DIRECTORIES>
     $<TARGET_PROPERTY:system,INTERFACE_INCLUDE_DIRECTORIES>
     $<TARGET_PROPERTY:radio,INTERFACE_INCLUDE_DIRECTORIES>

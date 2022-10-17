@@ -35,6 +35,9 @@
 // struct usart_async_descriptor Usart0;
 // static uint8_t rxBuffer[128];
 
+/*
+ * XXX: hard-coded to initialize USART_0 / Uart1
+ */
 void UartMcuInit( Uart_t *obj, uint8_t uartId, PinNames tx, PinNames rx )
 {
     obj->UartId = uartId;
@@ -43,20 +46,12 @@ void UartMcuInit( Uart_t *obj, uint8_t uartId, PinNames tx, PinNames rx )
 	_pm_enable_bus_clock(PM_BUS_APBC, SERCOM0);
 	_gclk_enable_channel(SERCOM0_GCLK_ID_CORE, CONF_GCLK_SERCOM0_CORE_SRC);
 
-#if 0
-    // USART initialization
-    usart_async_init( &Usart0, SERCOM0, rxBuffer, sizeof(rxBuffer), ( void *) NULL);
-#endif
+    // USART init
+    USART_0_init();
 
     // UASRT GPIO initialization
     gpio_set_pin_function( tx, PINMUX_PA10C_SERCOM0_PAD2 );
     gpio_set_pin_function( rx, PINMUX_PA11C_SERCOM0_PAD3 );
-
-    USART_0_init();
-
-#if 0
-    usart_async_enable( &Usart0 );
-#endif
 }
 
 void UartMcuConfig( Uart_t *obj, UartMode_t mode, uint32_t baudrate, WordLength_t wordLength, StopBits_t stopBits, Parity_t parity, FlowCtrl_t flowCtrl )

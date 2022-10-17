@@ -78,6 +78,9 @@ extern "C"
 #define EEPROM_SCLK                                 GPIO( GPIO_PORTA, 9)
 #define EEPROM_CS                                   GPIO( GPIO_PORTA, 6)
 
+#define USB_DP                                      GPIO( GPIO_PORTA, 25)
+#define USB_DN                                      GPIO( GPIO_PORTA, 24)
+
 // Debug pins definition.
 #define RADIO_DBG_PIN_TX                            NC
 #define RADIO_DBG_PIN_RX                            NC
