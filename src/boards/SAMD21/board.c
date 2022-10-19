@@ -510,15 +510,21 @@ void BoardLowPowerHandler( void )
 
 #if !defined ( __CC_ARM )
 
+
 /*
  * Function to be used by stdout for printf etc
  */
 int _write( int fd, const void *buf, size_t count )
 {
+    uint8_t state;
+
 #if 0
     while( UartPutBuffer( &Uart1, ( uint8_t* )buf, ( uint16_t )count ) != 0 ){ };
 #endif
-    cdcdf_acm_write(buf, count);
+
+    usb_write(buf, count);
+
+    // state = cdcdf_acm_write(buf, count);
 
     return count;
 }

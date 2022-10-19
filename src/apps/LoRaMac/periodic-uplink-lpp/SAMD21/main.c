@@ -261,7 +261,14 @@ int main( void )
 
     BoardInitMcu( );
     BoardInitPeriph( );
-    
+
+#if 0
+    NvmDataMgmtFactoryReset();
+    while (1) {
+
+    }
+#endif
+
     GpioWrite(&LedRx, 1);
     GpioWrite(&LedTx, 1);
     GpioWrite(&LedD13, 0);
@@ -281,7 +288,7 @@ int main( void )
 
     const Version_t appVersion = { .Value = FIRMWARE_VERSION };
     const Version_t gitHubVersion = { .Value = GITHUB_VERSION };
-    if (0) DisplayAppInfo( "periodic-uplink-lpp", 
+    DisplayAppInfo( "periodic-uplink-lpp", 
                     &appVersion,
                     &gitHubVersion );
 
