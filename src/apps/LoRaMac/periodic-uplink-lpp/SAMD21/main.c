@@ -271,7 +271,7 @@ int main( void )
 
     GpioWrite(&LedRx, 1);
     GpioWrite(&LedTx, 1);
-    GpioWrite(&LedD13, 0);
+    GpioWrite(&LedD13, 1);
 
     TimerInit( &Led1Timer, OnLed1TimerEvent );
     TimerSetValue( &Led1Timer, 25 );
