@@ -997,18 +997,25 @@ static void ProcessRadioRxDone( void )
                 joinType = MLME_REJOIN_2;
             }
 
-            VerifyParams_t verifyRxDr;
-            bool rxDrValid = true;
-
-            if( macMsgJoinAccept.DLSettings.Bits.RX2DataRate != 0x0F )
+            if( LORAMAC_CRYPTO_SUCCESS == macCryptoStatus )
             {
-                verifyRxDr.DatarateParams.Datarate = macMsgJoinAccept.DLSettings.Bits.RX2DataRate;
-                verifyRxDr.DatarateParams.DownlinkDwellTime = Nvm.MacGroup2.MacParams.DownlinkDwellTime;
-                rxDrValid = RegionVerify( Nvm.MacGroup2.Region, &verifyRxDr, PHY_RX_DR );
-            }
+                VerifyParams_t verifyRxDr;
 
-            if( ( LORAMAC_CRYPTO_SUCCESS == macCryptoStatus ) && ( rxDrValid == true ) )
-            {
+                if( macMsgJoinAccept.DLSettings.Bits.RX2DataRate != 0x0F )
+                {
+                    verifyRxDr.DatarateParams.Datarate = macMsgJoinAccept.DLSettings.Bits.RX2DataRate;
+                    verifyRxDr.DatarateParams.DownlinkDwellTime = Nvm.MacGroup2.MacParams.DownlinkDwellTime;
+                    if( RegionVerify( Nvm.MacGroup2.Region, &verifyRxDr, PHY_RX_DR ) == false )
+                    {
+                        // MLME handling
+                        if( LoRaMacConfirmQueueIsCmdActive( MLME_JOIN ) == true )
+                        {
+                            LoRaMacConfirmQueueSetStatus( LORAMAC_EVENT_INFO_STATUS_JOIN_FAIL, MLME_JOIN );
+                        }
+                        break;
+                    }
+                }
+
                 // Network ID
                 Nvm.MacGroup2.NetID = ( uint32_t ) macMsgJoinAccept.NetID[0];
                 Nvm.MacGroup2.NetID |= ( ( uint32_t ) macMsgJoinAccept.NetID[1] << 8 );
@@ -5488,7 +5495,7 @@ LoRaMacStatus_t LoRaMacMcpsRequest( McpsReq_t* mcpsRequest )
     memset1( ( uint8_t* ) &MacCtx.McpsConfirm, 0, sizeof( MacCtx.McpsConfirm ) );
     MacCtx.McpsConfirm.Status = LORAMAC_EVENT_INFO_STATUS_ERROR;
 
-    // Apply confirmed downlinks, if the device has not received a valid
+    // Apply confirmed uplinks, if the device has not received a valid
     // downlink after a join accept.
     if( ( Nvm.MacGroup2.NetworkActivation == ACTIVATION_TYPE_OTAA ) &&
         ( Nvm.MacGroup2.DeviceClass == CLASS_C ) &&
@@ -5699,4 +5706,22 @@ LoRaMacStatus_t LoRaMacDeInitialization( void )
     {
         return LORAMAC_STATUS_BUSY;
     }
+}
+
+void LoRaMacReset( void )
+{
+    // Reset state machine
+    MacCtx.MacState &= ~LORAMAC_TX_RUNNING;
+    MacCtx.MacFlags.Bits.MacDone = 1;
+
+    // Stop Timers
+    TimerStop( &MacCtx.TxDelayedTimer );
+    TimerStop( &MacCtx.RxWindowTimer1 );
+    TimerStop( &MacCtx.RxWindowTimer2 );
+
+    // Stop retransmissions
+    MacCtx.ChannelsNbTransCounter = Nvm.MacGroup2.MacParams.ChannelsNbTrans;
+
+    // Inform application layer
+    OnMacProcessNotify( );
 }
