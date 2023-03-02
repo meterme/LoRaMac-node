@@ -16,7 +16,8 @@
 ## Authors:  Johannes Bruder (STACKFORCE), Miguel Luis (Semtech)
 ##
 # set(CMAKE_C_COMPILER "C:\Program Files (x86)\GNU Arm Embedded Toolchain\10 2020-q4-major\bin\)
-set(TOOLCHAIN_PREFIX "C:/Program Files (x86)/GNU Arm Embedded Toolchain/10 2020-q4-major")
+set(TOOLCHAIN_PREFIX "C:/Program Files (x86)/Arm GNU Toolchain arm-none-eabi/12.2 rel1")
+
 #set(CMAKE_C_COMPILER "C:/Program Files (x86)/GNU Arm Embedded Toolchain/10 2020-q4-major/bin/arm-none-eabi-gcc.exe")
 #set(CMAKE_CXX_COMPILER "C:/Program Files (x86)/GNU Arm Embedded Toolchain/10 2020-q4-major/bin/arm-none-eabi-g++.exe")
 

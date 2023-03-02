@@ -411,17 +411,17 @@ processGpsGGA(void)
 
     altitude = strtof(gpsField[9], NULL);
 
-    *((int32_t *)(coords + 0)) = __bswap32( (int32_t)(lat * 1000000L) );
-    *((int32_t *)(coords + 4)) = __bswap32( (int32_t)(lon * 1000000L) );
+    *((int32_t *)(coords + 0)) = __builtin_bswap32( (int32_t)(lat * 1000000L) );
+    *((int32_t *)(coords + 4)) = __builtin_bswap32( (int32_t)(lon * 1000000L) );
 
     altitude = roundf(altitude);
   
-    *((uint16_t *)(coords + 8)) = __bswap16(4000); // mV
+    *((uint16_t *)(coords + 8)) = __builtin_bswap16(4000); // mV
     coords[10] = 0x04; // FLAG, LED off, no movement mode, version 1.6.4
-    *((uint16_t *)(coords + 11)) = __bswap16(0); // roll
-    *((uint16_t *)(coords + 13)) = __bswap16(0); // pitch
+    *((uint16_t *)(coords + 11)) = __builtin_bswap16(0); // roll
+    *((uint16_t *)(coords + 13)) = __builtin_bswap16(0); // pitch
     coords[15] = (int8_t)(hdop * 100.0);
-    *((uint16_t *)(coords + 16)) = __bswap16((int16_t)(altitude * 100.0)); // altitude
+    *((uint16_t *)(coords + 16)) = __builtin_bswap16((int16_t)(altitude * 100.0)); // altitude
 
     lastLat = lat;
     lastLng = lon;
